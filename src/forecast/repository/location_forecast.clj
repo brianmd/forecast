@@ -1,15 +1,15 @@
 (ns forecast.repository.location-forecast
-  (:require [forecast.repository.openweathermap-org :as open-weather]))
+  (:require [forecast.repository.openweathermap-org :as open-weather]
+            [forecast.repository.memory :as memory]))
 
-(defonce locations (atom {}))
-(defn clear-locations [] (reset! locations {}))
+(defonce storage (atom {:get memory/get-location :put memory/put-location}))
 
 (defn location->forecast
   [location]
-  (if-let [forecast (@locations location)]
+  (if-let [forecast ((:get @storage) location)]
     forecast
     (let [forecast (open-weather/get-forecast location)]
-      (swap! locations assoc location forecast)
+      ((:put @storage) location forecast)
       forecast)))
 
 ;; alias to a more repository-like command

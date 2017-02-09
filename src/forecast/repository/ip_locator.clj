@@ -1,16 +1,16 @@
 (ns forecast.repository.ip-locator
-  (:require [forecast.repository.ipinfo-io :as ipinfo]))
+  (:require [forecast.repository.ipinfo-io :as ipinfo]
+            [forecast.repository.memory :as memory]))
 
-(defonce ips (atom {}))
-(defn clear-ips [] (reset! ips {}))
+(defonce storage (atom {:get memory/get-ip :put memory/put-ip}))
 
 (defn ip->location
   [ip]
-  (if-let [location (@ips ip)]
+  (if-let [location ((:get @storage) ip)]
     location
     (let [location (ipinfo/get-location ip)
           with-timestamp (merge location {:retrieved-on (java.util.Date.)})]
-      (swap! ips assoc ip with-timestamp)
+      ((:put @storage) ip with-timestamp)
       with-timestamp)))
 
 ;; alias to a more repository-like command
