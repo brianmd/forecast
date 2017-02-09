@@ -50,4 +50,4 @@
 
 ;; (get-histogram)
 
-(run "logfile" 5)
+;; (run "logfile" 5)
