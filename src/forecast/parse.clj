@@ -23,6 +23,5 @@
    println
    ))
 
-;; (parse-logfile "logfile" log-parser)
-
+(parse-logfile "logfile" log-parser)
 
