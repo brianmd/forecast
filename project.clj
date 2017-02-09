@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/core.async "0.2.395"]
                  [clj-http "2.3.0"]
-                 [incanter "1.5.7"]
+                 [incanter "1.5.7"]   ;; R-like library
+                 [cheshire "5.7.0"]   ;; json
                  ]
   :main ^:skip-aot forecast.core
   :target-path "target/%s"
