@@ -26,9 +26,10 @@
   [ip]
   (if-let [location (@ips ip)]
     location
-    (let [location (force-ip->location ip)]
-      (swap! ips assoc ip location)
-      location)))
+    (let [location (force-ip->location ip)
+          with-timestamp (merge location {:retrieved-on (java.util.Date.)})]
+      (swap! ips assoc ip with-timestamp)
+      with-timestamp)))
 
 ;; alias to a more repository-like command
 (def get-location ip->location)
