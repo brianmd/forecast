@@ -16,7 +16,14 @@
     ))
 ;; (histogram [1 7 22 4 2 19] 5)
 
+(defn round-digits
+  "round to specified number of digits"
+  ([digits] (fn [num] (round-digits digits num)))
+  ([digits num]
+   (.divide (bigdec num) 1M digits java.math.RoundingMode/HALF_UP)))
+
 (defn log-error
-  [msg value]
-  (println msg value))
+  [& args]
+  (apply println args)
+  (first args))
 

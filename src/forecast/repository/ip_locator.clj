@@ -1,5 +1,5 @@
 (ns forecast.repository.ip-locator
-  (:require [forecast.helpers :refer [valid-ip?]]
+  (:require [forecast.helpers :refer [valid-ip? log-error]]
             [forecast.repository.storage.memory :as memory]
 
             [forecast.repository.locate-service.ipinfo-io :as ipinfo-io]
@@ -32,7 +32,7 @@
             with-timestamp (merge location {:retrieved-on (java.util.Date.)})]
         ((:put @storage) ip with-timestamp)
         with-timestamp))
-    {:error (str "ill-formed ip address: " ip)}))
+    (log-error {:error (str "ill-formed ip address: " ip)})))
 
 ;; alias to a more repository-like command
 (def get-location ip->location)

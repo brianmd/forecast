@@ -4,12 +4,12 @@
 
             [forecast.repository.ip-locator :refer [get-location all-locations]]
             [forecast.repository.location-forecast :refer [get-forecast all-temperatures]]
-            [forecast.helpers :refer [histogram]]
+            [forecast.helpers :refer [histogram round-digits]]
             ))
 
 (defn parse-logfile
   [filename f]
-  (println "\n----------- retrieve ip address locations")
+  (println "\n----------- retrieve ip address locations: " filename)
   (with-open [rdr (clojure.java.io/reader filename)]
     (doseq [line (line-seq rdr)]
       (f line))))
@@ -21,7 +21,6 @@
    (split #"\t")
    (nth 23)          ;; ip address
    get-location
-   println
    ))
 
 (defn process-all-locations
@@ -30,14 +29,18 @@
     (get-forecast loc)))
 
 (defn get-histogram
-  []
-  (histogram (all-temperatures) 4))
+  [num-bins]
+  (histogram (all-temperatures) num-bins))
 
 (defn run
-  [filename]
+  [filename num-bins]
   (parse-logfile filename log-parser)
   (process-all-locations)
-  (get-histogram))
+  (let [bins (get-histogram num-bins)]
+    (println "bucketMin\tbucketMax\tcount")
+    (doseq [bin bins]
+      (println (clojure.string/join "\t" [(round-digits 1 (first bin)) (round-digits 1 (second bin)) (int (nth bin 2))])))
+    ))
 
 ;; (parse-logfile "logfile" log-parser)
 ;; (parse-logfile "logfile-big" log-parser)
@@ -47,4 +50,4 @@
 
 ;; (get-histogram)
 
-;; (run "logfile")
+(run "logfile" 5)
