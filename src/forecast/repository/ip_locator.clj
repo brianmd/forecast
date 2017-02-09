@@ -30,5 +30,8 @@
       (swap! ips assoc ip location)
       location)))
 
+;; alias to a more repository-like command
+(def get-location ip->location)
+
 ;; (clear-ips)
-;; (prn (ip->location "8.8.8.8"))
+;; (prn (get-location "8.8.8.8"))

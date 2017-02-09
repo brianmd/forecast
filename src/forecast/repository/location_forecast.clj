@@ -49,5 +49,8 @@
       (swap! locations assoc location forecast)
       forecast)))
 
+;; alias to a more repository-like command
+(def get-forecast location->forecast)
+
 ;; (clear-locations)
-;; (prn (force-location->forecast {:latitude 37.386 :longitude -122.0838}))
+;; (prn (get-forecast {:latitude 37.386 :longitude -122.0838}))
