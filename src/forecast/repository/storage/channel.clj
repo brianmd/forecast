@@ -1,4 +1,4 @@
-(ns forecast.repository.channel
+(ns forecast.repository.storage.channel
   (:require [clojure.core.async
              :as a
              :refer [>! <! >!! <!! go chan buffer close! thread

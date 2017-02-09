@@ -1,4 +1,4 @@
-(ns forecast.repository.ipinfo-io
+(ns forecast.repository.locate-service.ipinfo-io
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string]]
             [clojure.string :refer [split]]

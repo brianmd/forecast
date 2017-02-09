@@ -1,6 +1,6 @@
 (ns forecast.repository.ip-locator
-  (:require [forecast.repository.ipinfo-io :as ipinfo]
-            [forecast.repository.memory :as memory]))
+  (:require [forecast.repository.locate-service.ipinfo-io :as ipinfo]
+            [forecast.repository.storage.memory :as memory]))
 
 (defonce storage (atom {:get memory/get-ip :put memory/put-ip}))
 

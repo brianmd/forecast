@@ -1,6 +1,6 @@
 (ns forecast.repository.location-forecast
-  (:require [forecast.repository.openweathermap-org :as open-weather]
-            [forecast.repository.memory :as memory]))
+  (:require [forecast.repository.forecast-service.openweathermap-org :as open-weather]
+            [forecast.repository.storage.memory :as memory]))
 
 (defonce storage (atom {:get memory/get-location :put memory/put-location}))
 

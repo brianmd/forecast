@@ -1,4 +1,4 @@
-(ns forecast.repository.aerospike
+(ns forecast.repository.storage.aerospike
   )
 
 (defn put-ip

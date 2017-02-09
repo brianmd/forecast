@@ -1,4 +1,4 @@
-(ns forecast.repository.openweathermap-org
+(ns forecast.repository.forecast-service.openweathermap-org
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string]]
             [clojure.walk :refer [keywordize-keys]]

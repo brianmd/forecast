@@ -1,4 +1,4 @@
-(ns forecast.repository.memory)
+(ns forecast.repository.storage.memory)
 
 (defonce locations (atom {}))
 (defn clear-locations [] (reset! locations {}))
