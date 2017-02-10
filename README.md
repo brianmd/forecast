@@ -18,9 +18,11 @@ For example, this command will make 10 location and weather calls to api servers
 WEATHER_API=apikey ./run data/logfile 5 --live
 ```
 
-while this command will generate 4080 locations and forecasts (not live, 4082 lines, 2 of which are not valid):
+while this command will generate 4080 locations and forecasts (not live, 4082 lines, 2 of which are not valid).
+
+Note the removal of '--live' soas not to overrun the free level of the services.
 ```sh
-WEATHER_API=apikey ./run data/logfile-big 10 --live
+WEATHER_API=apikey ./run data/logfile-big 10
 ```
 
 The above log files are supplied, but you may use any file path.
