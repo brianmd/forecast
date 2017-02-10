@@ -9,8 +9,7 @@
 
 (defn parse-logfile
   [filename f]
-  (println "\n----------- retrieve ip address locations: " filename)
-  (with-open [rdr (clojure.java.io/reader filename)]
+  (with-open [rdr (clojure.java.io/reader (str "data/" filename))]
     (doseq [line (line-seq rdr)]
       (f line))))
 
@@ -37,7 +36,7 @@
   (parse-logfile filename log-parser)
   (process-all-locations)
   (let [bins (get-histogram num-bins)]
-    (println "bucketMin\tbucketMax\tcount")
+    (println "\nbucketMin\tbucketMax\tcount")
     (doseq [bin bins]
       (println (clojure.string/join "\t" [(round-digits 1 (first bin)) (round-digits 1 (second bin)) (int (nth bin 2))])))
     ))
