@@ -31,7 +31,7 @@
          (map #(-> % :main :temp_max))
          (apply max)
          )
-        {:error (str "error response for location (" (:status response) ")")}
+        {:error (str "error response for location (" (:status response) ", " (:body response) ")")}
         ))
     (catch Exception e {:error (str e)})))
 
