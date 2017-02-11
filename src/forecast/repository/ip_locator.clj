@@ -1,5 +1,6 @@
 (ns forecast.repository.ip-locator
-  (:require [forecast.helpers :refer [valid-ip? log-error bump]]
+  (:require [clojure.tools.logging :as log]
+            [forecast.helpers :refer [valid-ip? bump]]
             [forecast.repository.storage.memory :as memory]
 
             [forecast.repository.locate-service.ipinfo-io :as ipinfo-io]
@@ -43,9 +44,12 @@
               with-timestamp (merge location {:retrieved-on (java.util.Date.)})]
           (insert-storage ip with-timestamp)
           with-timestamp))
-      (log-error {:error (str "ill-formed ip address: " ip)}))
+      (do
+        (log/errorf "ill-formed ip address: %s" ip)
+        {:error (str "ill-formed ip address: " ip)})
+      )
     (catch Throwable e
-      (println e)
+      (log/errorf e "ill-formed ip address: %s" ip)
       )))
 
 ;; alias to a more repository-like command

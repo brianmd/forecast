@@ -1,5 +1,6 @@
 (ns forecast.repository.location-forecast
-  (:require [forecast.repository.storage.memory :as memory]
+  (:require [clojure.tools.logging :as log]
+            [forecast.repository.storage.memory :as memory]
             [forecast.repository.forecast-service.openweathermap-org :as openweather]
             [forecast.repository.forecast-service.random :as random]
    ))
@@ -35,7 +36,7 @@
         ((:insert @storage-fns) location forecast)
         forecast))
     (catch Throwable e
-      (println e)
+      (log/errorf e "ill-formed location:  %s" location)
       )))
 
 ;; alias to a more repository-like command

@@ -2,6 +2,7 @@
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string]]
             [clojure.string :refer [split]]
+            [clojure.tools.logging :as log]
 
             [forecast.helpers :refer [bump]]
             ))
@@ -18,8 +19,12 @@
          (split #",")
          ((fn [v] {:latitude (read-string (first v)) :longitude (read-string (second v))}))
          )
-        {:error (str "error response for ip (" (:status response) ")")}
+        (do
+          (log/errorf "ill-formed ip (status: %s): %s" (:status response) ip)
+          {:error (str "error response for ip (" (:status response) ")")})
         ))
-    (catch Exception e {:error (str e)})))
+    (catch Throwable e
+      (log/errorf e "error in ipinfo-io/find-location: %s" ip)
+      {:error (str e)})))
 
 

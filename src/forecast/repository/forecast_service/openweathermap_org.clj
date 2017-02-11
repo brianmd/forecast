@@ -1,5 +1,6 @@
 (ns forecast.repository.forecast-service.openweathermap-org
   (:require [clj-http.client :as client]
+            [clojure.tools.logging :as log]
             [cheshire.core :refer [parse-string]]
             [clojure.walk :refer [keywordize-keys]]
             [forecast.helpers :refer [bump]]
@@ -35,5 +36,7 @@
          )
         {:error (str "error response for location (" (:status response) ", " (:body response) ")")}
         ))
-    (catch Exception e {:error (str e)})))
+    (catch Exception e
+      (log/errorf e "error in openweathermap/find-forecast: %s" location)
+      {:error (str e)})))
 

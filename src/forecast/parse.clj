@@ -1,6 +1,7 @@
 (ns forecast.parse
   (:require [clojure.string :refer [split]]
             [clojure.java.io]
+            [clojure.tools.logging :as log]
 
             [forecast.metrics :as metrics :refer [reset-metrics bump]]
             [forecast.repository.ip-locator :refer [find-location all-locations]]

@@ -1,5 +1,7 @@
 (ns forecast.helpers
-  (:require [forecast.metrics :as metrics])
+  (:require [clojure.tools.logging :as log]
+            [forecast.metrics :as metrics]
+            )
   (:import [org.jfree.data.statistics HistogramDataset]))
 
 (def ip-regex
@@ -30,9 +32,4 @@
   ([digits] (fn [num] (round-digits digits num)))
   ([digits num]
    (.divide (bigdec num) 1M digits java.math.RoundingMode/HALF_UP)))
-
-(defn log-error
-  [& args]
-  (apply println args)
-  (first args))
 
