@@ -1,4 +1,5 @@
-(ns forecast.repository.storage.memory)
+(ns forecast.repository.storage.memory
+  (:require [forecast.metrics :refer [bump]]))
 
 (defonce ips (atom {}))
 (defn clear-ips [] (reset! ips {}))
@@ -11,24 +12,28 @@
   (clear-ips)
   (clear-locations))
 
-(defn put-ip
+(defn insert-ip
   [ip location]
+  (bump [:ip :inserts])
   (swap! ips assoc ip location))
 
-(defn get-ip
+(defn find-ip
   [ip]
+  (bump [:ip :finds])
   (@ips ip))
 
 (defn all-locations
   []
   (vals @ips))
 
-(defn put-location
+(defn insert-location
   [location forecast]
+  (bump [:location :inserts])
   (swap! locations assoc location forecast))
 
-(defn get-location
+(defn find-location
   [location]
+  (bump [:location :finds])
   (@locations location))
 
 (defn all-temperatures

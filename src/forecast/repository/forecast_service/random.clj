@@ -1,5 +1,8 @@
-(ns forecast.repository.forecast-service.random)
+(ns forecast.repository.forecast-service.random
+  (:require [forecast.helpers :refer [bump]]
+            ))
 
-(defn get-forecast
+(defn find-forecast
   [location]
+  (bump [:location :service-finds])
   (+ 25 (rand 50)))

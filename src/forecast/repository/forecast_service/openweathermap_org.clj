@@ -2,6 +2,7 @@
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string]]
             [clojure.walk :refer [keywordize-keys]]
+            [forecast.helpers :refer [bump]]
             )
   (:import [java.util Calendar]))
 
@@ -16,8 +17,9 @@
            (java.util.Date. (+ (* 1 86400 1000) (.getTime (java.util.Date.))))
            ))
 
-(defn get-forecast
+(defn find-forecast
   [location]
+  (bump [:location :service-finds])
   (try
     (let [url (str "http://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=" (:latitude location) "&lon=" (:longitude location) "&APPID=" (api))
           response (client/get url {:accept :json :socket-timeout 1000 :conn-timeout 1000})

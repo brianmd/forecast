@@ -1,4 +1,5 @@
 (ns forecast.helpers
+  (:require [forecast.metrics :as metrics])
   (:import [org.jfree.data.statistics HistogramDataset]))
 
 (def ip-regex
@@ -7,6 +8,14 @@
 (defn valid-ip?
   [ip]
   (not (nil? (re-matches ip-regex ip))))
+
+(defn bump
+  [metric]
+  (metrics/bump metric))
+
+(defn print-metrics
+  []
+  (metrics/print-metrics))
 
 (defn histogram
   [data num-bins]

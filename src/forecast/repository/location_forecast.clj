@@ -8,16 +8,16 @@
 (defonce forecast-service (atom nil))
 
 (defn use-memory-storage []
-  (reset! storage-fns {:get              #'memory/get-location
-                       :put              #'memory/put-location
+  (reset! storage-fns {:find              #'memory/find-location
+                       :insert              #'memory/insert-location
                        :clear            #'memory/clear-locations
                        :all-temperatures #'memory/all-temperatures}))
 
 (defn use-random-service []
-  (reset! forecast-service #'random/get-forecast))
+  (reset! forecast-service #'random/find-forecast))
 
 (defn use-openweather-service []
-  (reset! forecast-service #'openweather/get-forecast))
+  (reset! forecast-service #'openweather/find-forecast))
 
 (defn all-temperatures []
   ((:all-temperatures @storage-fns)))
@@ -29,17 +29,17 @@
   [location]
   ;; TODO: could validate location before making this call
   (try
-    (if-let [forecast ((:get @storage-fns) location)]
+    (if-let [forecast ((:find @storage-fns) location)]
       forecast
       (let [forecast (@forecast-service location)]
-        ((:put @storage-fns) location forecast)
+        ((:insert @storage-fns) location forecast)
         forecast))
     (catch Throwable e
       (println e)
       )))
 
 ;; alias to a more repository-like command
-(def get-forecast location->forecast)
+(def find-forecast location->forecast)
 
 ;; (clear-storage)
 ;; (use-random-service)

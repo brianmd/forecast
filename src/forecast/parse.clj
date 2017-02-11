@@ -2,15 +2,18 @@
   (:require [clojure.string :refer [split]]
             [clojure.java.io]
 
-            [forecast.repository.ip-locator :refer [get-location all-locations]]
-            [forecast.repository.location-forecast :refer [get-forecast all-temperatures]]
-            [forecast.helpers :refer [histogram round-digits]]
+            [forecast.metrics :as metrics :refer [reset-metrics bump]]
+            [forecast.repository.ip-locator :refer [find-location all-locations]]
+            [forecast.repository.location-forecast :refer [find-forecast all-temperatures]]
+            [forecast.repository.storage.memory :as memory]
+            [forecast.helpers :refer [histogram round-digits print-metrics]]
             ))
 
 (defn parse-logfile
   [filename f]
   (with-open [rdr (clojure.java.io/reader (str "data/" filename))]
     (doseq [line (line-seq rdr)]
+      (bump :num-logs)
       (f line))))
 
 (defn log-parser
@@ -19,27 +22,38 @@
    line
    (split #"\t")
    (nth 23)          ;; ip address
-   get-location
+   find-location
    ))
 
 (defn process-all-locations
   []
   (doseq [loc (all-locations)]
-    (get-forecast loc)))
+    (find-forecast loc)))
 
 (defn get-histogram
   [num-bins]
-  (histogram (all-temperatures) num-bins))
+  (let [temps (all-temperatures)]
+    (if (empty? temps)
+      []
+      (histogram (all-temperatures) num-bins))))
 
 (defn run
   [filename num-bins]
+  (reset-metrics)
+  (memory/clear)
   (parse-logfile filename log-parser)
   (process-all-locations)
+  (print-metrics)
   (let [bins (get-histogram num-bins)]
-    (println "\nbucketMin\tbucketMax\tcount")
-    (doseq [bin bins]
-      (println (clojure.string/join "\t" [(round-digits 1 (first bin)) (round-digits 1 (second bin)) (int (nth bin 2))])))
-    ))
+    (if bins
+      (do
+        (println "\nbucketMin\tbucketMax\tcount")
+        (doseq [bin bins]
+          (println (clojure.string/join "\t" [(round-digits 1 (first bin)) (round-digits 1 (second bin)) (int (nth bin 2))]))))
+      (println "no temperatures found"))
+    )
+  ;; metrics/metrics
+  )
 
 ;; (parse-logfile "logfile" log-parser)
 ;; (parse-logfile "logfile-big" log-parser)

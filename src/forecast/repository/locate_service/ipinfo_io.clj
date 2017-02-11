@@ -2,10 +2,13 @@
   (:require [clj-http.client :as client]
             [cheshire.core :refer [parse-string]]
             [clojure.string :refer [split]]
+
+            [forecast.helpers :refer [bump]]
             ))
 
-(defn get-location
+(defn find-location
   [ip]
+  (bump [:ip :service-finds])
   (try
     (let [url (str "http://ipinfo.io/" ip)
           response (client/get url {:accept :json :socket-timeout 1000 :conn-timeout 1000})]
