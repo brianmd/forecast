@@ -1,18 +1,20 @@
 (ns forecast.repository.location-forecast
   (:require [clojure.tools.logging :as log]
+            [clojure.set :as set]
+            [forecast.repository.repository :as r]
+
             [forecast.repository.storage.memory :as memory]
+
             [forecast.repository.forecast-service.openweathermap-org :as openweather]
             [forecast.repository.forecast-service.random :as random]
-   ))
 
-(defonce storage-fns (atom {}))
+            [clojure.set :as set]))
+
 (defonce forecast-service (atom nil))
+(def location-repo (atom nil))
 
 (defn use-memory-storage []
-  (reset! storage-fns {:find              #'memory/find-location
-                       :insert              #'memory/insert-location
-                       :clear            #'memory/clear-locations
-                       :all-temperatures #'memory/all-temperatures}))
+  (reset! location-repo (memory/build-repository "location")))
 
 (defn use-random-service []
   (reset! forecast-service #'random/find-forecast))
@@ -21,39 +23,24 @@
   (reset! forecast-service #'openweather/find-forecast))
 
 (defn all-temperatures []
-  ((:all-temperatures @storage-fns)))
+  (r/find-all @location-repo))
 
-(defn clear-storage []
-  ((:clear @storage-fns)))
-
-(defn location->forecast
+(defn find-forecast
   [location]
   ;; TODO: could validate location before making this call
   (try
-    (if-let [forecast ((:find @storage-fns) location)]
-      forecast
-      (let [forecast (@forecast-service location)]
-        ((:insert @storage-fns) location forecast)
-        forecast))
+    (let [key (select-keys location [:latitude :longitude])]
+      (if-let [forecast (r/find @location-repo key)]
+        forecast
+        (let [forecast (@forecast-service key)]
+          (r/upsert-cols! @location-repo key {:temp forecast})
+          forecast)))
     (catch Throwable e
       (log/errorf e "ill-formed location:  %s" location)
       )))
 
-;; alias to a more repository-like command
-(def find-forecast location->forecast)
-
-;; (clear-storage)
-;; (use-random-service)
-;; (use-openweather-service)
-;; (location->forecast {:latitude 37.386 :longitude -122.0838})
-;; (map
-;;  (fn [n]
-;;    (println n)
-;;    (clear-storage)
-;;    (location->forecast {:latitude 37.386 :longitude -122.0838})
-;;    )
-;;  (range 10))
-
 ;; set defaults
 (use-memory-storage)
 (use-random-service)
+
+;; (:repo @location-repo)

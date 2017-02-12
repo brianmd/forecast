@@ -1,5 +1,6 @@
 (ns forecast.helpers
   (:require [clojure.tools.logging :as log]
+            [clojure.walk :refer [keywordize-keys]]
             [forecast.metrics :as metrics]
             )
   (:import [org.jfree.data.statistics HistogramDataset]))
@@ -12,8 +13,12 @@
   (not (nil? (re-matches ip-regex ip))))
 
 (defn bump
-  [metric]
-  (metrics/bump metric))
+  ([metric] (metrics/bump metric))
+  ([metrics metric] (metrics/bump metrics metric)))
+
+(defn now
+  []
+  (System/currentTimeMillis))
 
 (defn print-metrics
   []
@@ -32,4 +37,9 @@
   ([digits] (fn [num] (round-digits digits num)))
   ([digits num]
    (.divide (bigdec num) 1M digits java.math.RoundingMode/HALF_UP)))
+
+(defn hash->map
+  [hashmap]
+  (when hashmap
+    (keywordize-keys (zipmap (.keySet hashmap) (.values hashmap)))))
 

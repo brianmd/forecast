@@ -26,9 +26,15 @@
   (reset! metrics (metrics-builder)))
 
 (defn bump
-  [metric]
-  (try
-    (swap! metrics update-in (if (vector? metric) metric (vector metric)) inc)
-    (catch Throwable e
-      (println "error in bump. no such metric: " metric))))
+  ([metric] (bump metrics metric))
+  ([metrics metric]
+   (try
+     (let [k (if (vector? metric) metric (vector metric))
+           v (get-in @metrics k)]
+       (if v
+         (swap! metrics update-in k inc)
+         (swap! metrics assoc-in k 1)
+         ))
+     (catch Throwable e
+       (println "error in bump. no such metric: " metric metrics)))))
 

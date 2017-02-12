@@ -11,4 +11,5 @@ pom.xml.asc
 .hg/
 /.envrc
 /data/dockerlog
+/data/log.log
 

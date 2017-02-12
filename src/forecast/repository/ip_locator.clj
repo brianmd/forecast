@@ -1,20 +1,18 @@
 (ns forecast.repository.ip-locator
   (:require [clojure.tools.logging :as log]
-            [forecast.helpers :refer [valid-ip? bump]]
+            [forecast.helpers :refer [valid-ip? bump now]]
+            [forecast.repository.repository :as r]
+
             [forecast.repository.storage.memory :as memory]
+            [forecast.repository.storage.aerospike :as aero]
+
 
             [forecast.repository.locate-service.ipinfo-io :as ipinfo-io]
             [forecast.repository.locate-service.random :as random]
             ))
 
-(defonce storage-fns (atom {}))
 (defonce locate-service (atom nil))
-
-(defn use-memory-storage []
-  (reset! storage-fns {:find #'memory/find-ip
-                       :insert #'memory/insert-ip
-                       :clear #'memory/clear-ips
-                       :all-locations #'memory/all-locations}))
+(def ip-repo (atom nil))
 
 (defn use-random-service []
   (reset! locate-service #'random/find-location))
@@ -22,27 +20,18 @@
 (defn use-ipinfo-service []
   (reset! locate-service #'ipinfo-io/find-location))
 
-(defn all-locations []
-  ((:all-locations @storage-fns)))
+(defn use-memory-storage []
+  (reset! ip-repo (memory/build-repository "ip")))
 
-(defn clear-storage []
-  ((:clear @storage-fns)))
-
-(defn find-storage [ip]
-  ((:find @storage-fns) ip))
-
-(defn insert-storage [ip m]
-  ((:insert @storage-fns) ip m))
-
-(defn ip->location
+(defn find-location
   [ip]
   (try
     (if (valid-ip? ip)
-      (if-let [location (find-storage ip)]
+      (if-let [location (r/find @ip-repo ip)]
         location
         (let [location (@locate-service ip)
-              with-timestamp (merge location {:retrieved-on (java.util.Date.)})]
-          (insert-storage ip with-timestamp)
+              with-timestamp (merge location {:retrieved-on (now)})]
+          (r/upsert-cols! @ip-repo ip with-timestamp)
           with-timestamp))
       (do
         (log/errorf "ill-formed ip address: %s" ip)
@@ -52,12 +41,8 @@
       (log/errorf e "ill-formed ip address: %s" ip)
       )))
 
-;; alias to a more repository-like command
-(def find-location ip->location)
-
-;; (clear-storage)
-;; (use-ipinfo-service)
-;; (ip->location "8.8.8.8")
+(defn all-locations []
+  (r/find-all @ip-repo))
 
 ;; set defaults
 (use-memory-storage)
