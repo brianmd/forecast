@@ -42,7 +42,9 @@
       )))
 
 (defn all-locations []
-  (r/find-all @ip-repo))
+  (r/query @ip-repo {"state" "new"})
+  ;; (r/find-all @ip-repo)
+  )
 
 ;; set defaults
 (use-memory-storage)

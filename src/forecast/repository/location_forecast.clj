@@ -22,9 +22,6 @@
 (defn use-openweather-service []
   (reset! forecast-service #'openweather/find-forecast))
 
-(defn all-temperatures []
-  (r/find-all @location-repo))
-
 (defn find-forecast
   [location]
   ;; TODO: could validate location before making this call
@@ -38,6 +35,11 @@
     (catch Throwable e
       (log/errorf e "ill-formed location:  %s" location)
       )))
+
+(defn all-temperatures []
+  (r/query @location-repo {"state" "new"})
+  ;; (r/find-all @location-repo)
+  )
 
 ;; set defaults
 (use-memory-storage)

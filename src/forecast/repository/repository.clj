@@ -20,6 +20,12 @@
   (h/bump (metrics repo) :find-all)
   ((:find-all repo)))
 
+(defn query
+  [repo key-val]
+  (h/bump (metrics repo) :query)
+  ((:query repo) key-val)
+  )
+
 (defn upsert-cols!
   [repo key m]
   (h/bump (metrics repo) :upsert-cols!)
@@ -33,6 +39,8 @@
 ;; (def r (forecast.repository.storage.memory/build-repository "ip"))
 ;; (upsert-cols! r :x {:f 4})
 ;; (upsert-cols! r :x {:g 4})
+;; (upsert-cols! r :y {:f 4})
 ;; (find r :x)
 ;; (find-all r)
+;; (query r {:f 4})
 

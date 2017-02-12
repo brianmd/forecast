@@ -43,3 +43,11 @@
   (when hashmap
     (keywordize-keys (zipmap (.keySet hashmap) (.values hashmap)))))
 
+(defn ->keyname
+  [o]
+  (if (string? o) o (str "~edn" (pr-str o))))
+
+(defn ->map
+  [rec]
+  (if rec (hash->map (.bins (.record rec)))))
+
