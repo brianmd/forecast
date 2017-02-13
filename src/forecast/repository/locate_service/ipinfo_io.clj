@@ -1,21 +1,21 @@
 (ns forecast.repository.locate-service.ipinfo-io
   (:require [clj-http.client :as client]
-            [cheshire.core :refer [parse-string]]
+            [cheshire.core :as json]
             [clojure.string :refer [split]]
             [clojure.tools.logging :as log]
 
-            [forecast.helpers :refer [bump]]
+            [forecast.helpers :as h]
             ))
 
 (defn find-location
   [ip]
-  (bump [:ip :service-finds])
+  (h/bump [:ip :service-finds])
   (try
     (let [url (str "http://ipinfo.io/" ip)
           response (client/get url {:accept :json :socket-timeout 1000 :conn-timeout 1000})]
       (if (= (:status response) 200)
         (->
-         ((parse-string (:body response)) "loc")
+         ((json/parse-string (:body response)) "loc")
          (split #",")
          ((fn [v] {:latitude (read-string (first v)) :longitude (read-string (second v))}))
          )

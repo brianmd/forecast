@@ -8,6 +8,7 @@
   (get @repo key))
 
 (defn find-all
+  "returns all values"
   [repo]
   (vals @repo))
 

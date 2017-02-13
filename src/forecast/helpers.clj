@@ -12,6 +12,8 @@
   [ip]
   (not (or (nil? ip) (nil? (re-matches ip-regex ip)))))
 
+(def lat-long-8.8.8.8 {:latitude 37.386 :longitude -122.0838})
+
 (defn bump
   ([metric] (metrics/bump metric))
   ([metrics metric] (metrics/bump metrics metric)))
