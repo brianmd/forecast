@@ -16,14 +16,17 @@
 (defonce locate-service (atom nil))
 (def ip-repo (atom nil))
 
+(defn use-memory-storage []
+  (reset! ip-repo (memory/build-repository "ip")))
+
+(defn use-aerospike-storage []
+  (reset! ip-repo (aero/build-repository "ip")))
+
 (defn use-random-service []
   (reset! locate-service #'random/find-location))
 
 (defn use-ipinfo-service []
   (reset! locate-service #'ipinfo-io/find-location))
-
-(defn use-memory-storage []
-  (reset! ip-repo (memory/build-repository "ip")))
 
 (defn store-ip
   [ip]
@@ -31,6 +34,7 @@
 
 (defn find-location
   [ip]
+  (println "findloc" ip)
   (try
     (if (valid-ip? ip)
       (let [location (r/find @ip-repo ip)]
@@ -52,20 +56,18 @@
       )))
 
 (defn new-ips []
-  (map second (r/query @ip-repo {"state" "new"})))
+  ;; (map identity (r/query @ip-repo {"state" "new"})))
+  (map (comp :id second) (r/query @ip-repo {"state" "new"})))
 
-(defn new-locations []
-  (map second (r/query @ip-repo {"state" "new"})))
-
-(defn all-locations []
-  (r/find-all @ip-repo))
+;; (defn new-locations []
+;;   (map second (r/query @ip-repo {"state" "new"})))
 
 ;; set defaults
 (use-memory-storage)
 (use-random-service)
 
 ;; (all-locations)
-;; (new-locations)
+;; (new-ips)
 ;; (map second (r/query @ip-repo {"state" "done"}))
 ;; (:repo @ip-repo)
 ;; (first @(:repo @ip-repo))
@@ -73,3 +75,12 @@
 ;; (r/find @ip-repo "173.252.110.113")
 ;; (find-location "173.252.110.113")
 ;; (@locate-service "173.252.110.113")
+
+;; (:close! @ip-repo)
+;; (:repo @ip-repo)
+;; (:find @ip-repo)
+;; ((:find @ip-repo) "173.252.110.113")
+
+
+;; (aero/close! nil)
+;; (use-aerospike-storage)

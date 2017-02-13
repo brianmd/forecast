@@ -2,9 +2,10 @@
   (:require [clojure.pprint :refer [pprint]]))
 
 (defn- service-metric-builder []
-  {:service-finds 0
-   :inserts       0
-   :finds         0
+  {
+   ;; :service-finds 0
+   ;; :inserts       0
+   ;; :finds         0
 
    ;; :num-gets    0
    ;; :num-finds   0
@@ -12,7 +13,8 @@
    })
 
 (defn- metrics-builder []
-  {:num-logs 0
+  {
+   :num-logs 0
    :ip       (service-metric-builder)
    :location (service-metric-builder)
    })

@@ -5,6 +5,7 @@
             [forecast.repository.repository :as r]
 
             [forecast.repository.storage.memory :as memory]
+            [forecast.repository.storage.aerospike :as aero]
 
             [forecast.repository.forecast-service.openweathermap-org :as openweather]
             [forecast.repository.forecast-service.random :as random]
@@ -16,6 +17,9 @@
 
 (defn use-memory-storage []
   (reset! location-repo (memory/build-repository "location")))
+
+(defn use-aerospike-storage []
+  (reset! location-repo (aero/build-repository "location")))
 
 (defn use-random-service []
   (reset! forecast-service #'random/find-forecast))
@@ -50,15 +54,32 @@
 ;; (@forecast-service 3)
 ;; (h/add-state "xx" {:temp 3})
 
-(defn new-locations []
-  (map second (r/query @location-repo {"state" "new"})))
+(defn new-maps []
+  (r/query @location-repo {"state" "new"}))
+(defn done-maps []
+  (r/query @location-repo {"state" "done"}))
 
-(defn all-temperatures []
-  (r/find-all @location-repo))
+(defn new-locations []
+  ;; (map #(select-keys % [:latitude :longitude]) (r/query @location-repo {"state" "new"})))
+  (map #(select-keys % [:latitude :longitude]) (vals (r/query @location-repo {"state" "new"}))))
+  ;; (map identity (r/query @location-repo {"state" "new"})))
+  ;; (map second (r/query @location-repo {"state" "new"})))
+
+(defn done-temperatures []
+  ;; (map :temp (r/query @location-repo {"state" "done"})))
+  (map :temp (vals (r/query @location-repo {"state" "done"}))))
 
 ;; set defaults
 (use-memory-storage)
 (use-random-service)
 
 ;; (store-location {:a 3})
-(:repo @location-repo)
+;; (:repo @location-repo)
+;; (new-maps)
+;; (done-maps)
+;; (vals (new-maps))
+;; (new-locations)
+;; (done-temperatures)
+
+
+;; (use-aerospike-storage)

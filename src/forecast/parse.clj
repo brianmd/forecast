@@ -3,18 +3,23 @@
             [clojure.java.io]
             [clojure.tools.logging :as log]
 
-            [forecast.metrics :as metrics :refer [reset-metrics bump]]
-            [forecast.repository.ip-locator :refer [find-location store-ip new-ips ip-repo]]
-            [forecast.repository.location-forecast :refer [find-forecast all-temperatures location-repo store-location new-locations]]
+            [forecast.helpers :as h]
+            [forecast.metrics :as metrics]
+            [forecast.repository.ip-locator :as ip]
+            [forecast.repository.location-forecast :as location]
             [forecast.repository.storage.memory :as memory]
-            [forecast.helpers :refer [histogram round-digits print-metrics]]
             ))
+
+(defn use-aerospike-storage
+  []
+  (ip/use-aerospike-storage)
+  (location/use-aerospike-storage))
 
 (defn parse-logfile
   [filename f]
   (with-open [rdr (clojure.java.io/reader (str "data/" filename))]
     (doseq [line (line-seq rdr)]
-      (bump :num-logs)
+      (h/bump :num-logs)
       (f line))))
 
 (defn log-parser
@@ -23,49 +28,45 @@
    line
    (split #"\t")
    (nth 23)          ;; ip address
-   ;; find-location
-   store-ip
+   ip/store-ip
    ))
-;; (parse-logfile "logfile" log-parser)
 
 (defn process-new-ips
   []
-  (doseq [ip-map (new-ips)]
-    (find-location (:id ip-map))))
-
-;; (doseq [ip (new-ips)] (prn (:id ip)))
-;; (process-new-ips)
+  (doseq [ip (ip/new-ips)]
+    (ip/find-location ip)))
 
 (defn process-new-locations
   []
-  (doseq [loc (new-locations)]
-    (find-forecast loc)))
-;; (doseq [loc (new-locations)] (println loc))
+  (doseq [loc (location/new-locations)]
+    (location/find-forecast loc)))
+;; (doseq [loc (location/new-locations)] (println loc))
 
 (defn get-histogram
   [num-bins]
-  (let [temps (all-temperatures)]
+  (let [temps (location/done-temperatures)]
     (if (empty? temps)
       []
-      (histogram (map :temp temps) num-bins))))
+      ;; (h/histogram (map :temp temps) num-bins))))
+      (h/histogram temps num-bins))))
 
 (defn run
   [filename num-bins]
   (println "\n\n-------------")
-  (reset-metrics)
+  (metrics/reset-metrics)
   ;; (memory/clear)
   (parse-logfile filename log-parser)
   (process-new-ips)
   (process-new-locations)
-  (print-metrics)
-  (println "ip metrics:" (:metrics @ip-repo))
-  (println "location metrics: " (:metrics @location-repo))
+  (metrics/print-metrics)
+  (println "ip metrics:" (:metrics @ip/ip-repo))
+  (println "location metrics: " (:metrics @location/location-repo))
   (let [bins (get-histogram num-bins)]
     (if bins
       (do
         (println "\nbucketMin\tbucketMax\tcount")
         (doseq [bin bins]
-          (println (clojure.string/join "\t" [(round-digits 1 (first bin)) (round-digits 1 (second bin)) (int (nth bin 2))]))))
+          (println (clojure.string/join "\t" [(h/round-digits 1 (first bin)) (h/round-digits 1 (second bin)) (int (nth bin 2))]))))
       (println "no temperatures found"))
     )
   ;; metrics/metrics
@@ -74,9 +75,18 @@
 ;; (parse-logfile "logfile" log-parser)
 ;; (parse-logfile "logfile-big" log-parser)
 
+;; (process-new-locations)
 ;; (process-all-locations)
-;; (all-temperatures)
+;; (ip/new-ips)
+;; (location/new-locations)
+;; (location/done-temperatures)
+;; (:close! @ip/ip-repo)
 
-;; (get-histogram)
+;; (process-new-locations)
+;; (location/done-temperatures)
+;; (get-histogram 5)
 
-(run "logfile" 5)
+
+;; (use-aerospike-storage)
+;; (run "logfile" 5)
+

@@ -10,7 +10,7 @@
 
 (defn valid-ip?
   [ip]
-  (not (nil? (re-matches ip-regex ip))))
+  (not (or (nil? ip) (nil? (re-matches ip-regex ip)))))
 
 (defn bump
   ([metric] (metrics/bump metric))
