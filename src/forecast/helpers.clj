@@ -51,3 +51,14 @@
   [rec]
   (if rec (hash->map (.bins (.record rec)))))
 
+(defn add-state
+  [key m]
+  (let [s (->keyname key)
+        date (now)
+        m (cond-> (assoc m :id s)
+            (not (contains? m :state)) (assoc "state" "new"
+                                              :stated-on date
+                                              :created-on date)
+            )
+        ]
+    m))

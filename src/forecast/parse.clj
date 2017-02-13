@@ -4,8 +4,8 @@
             [clojure.tools.logging :as log]
 
             [forecast.metrics :as metrics :refer [reset-metrics bump]]
-            [forecast.repository.ip-locator :refer [find-location all-locations ip-repo]]
-            [forecast.repository.location-forecast :refer [find-forecast all-temperatures location-repo]]
+            [forecast.repository.ip-locator :refer [find-location store-ip new-ips ip-repo]]
+            [forecast.repository.location-forecast :refer [find-forecast all-temperatures location-repo store-location new-locations]]
             [forecast.repository.storage.memory :as memory]
             [forecast.helpers :refer [histogram round-digits print-metrics]]
             ))
@@ -23,14 +23,24 @@
    line
    (split #"\t")
    (nth 23)          ;; ip address
-   find-location
+   ;; find-location
+   store-ip
    ))
 ;; (parse-logfile "logfile" log-parser)
 
-(defn process-all-locations
+(defn process-new-ips
   []
-  (doseq [loc (all-locations)]
+  (doseq [ip-map (new-ips)]
+    (find-location (:id ip-map))))
+
+;; (doseq [ip (new-ips)] (prn (:id ip)))
+;; (process-new-ips)
+
+(defn process-new-locations
+  []
+  (doseq [loc (new-locations)]
     (find-forecast loc)))
+;; (doseq [loc (new-locations)] (println loc))
 
 (defn get-histogram
   [num-bins]
@@ -45,7 +55,8 @@
   (reset-metrics)
   ;; (memory/clear)
   (parse-logfile filename log-parser)
-  (process-all-locations)
+  (process-new-ips)
+  (process-new-locations)
   (print-metrics)
   (println "ip metrics:" (:metrics @ip-repo))
   (println "location metrics: " (:metrics @location-repo))
@@ -68,4 +79,4 @@
 
 ;; (get-histogram)
 
-;; (run "logfile" 5)
+(run "logfile" 5)
