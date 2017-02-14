@@ -47,7 +47,15 @@
 
 (defn ->keyname
   [o]
-  (if (string? o) o (str "~edn" (pr-str o))))
+  (cond
+    (string? o) o
+    (keyword? o) (name o)
+    (number? o) (str o)
+    :else (str "~edn" (pr-str o))
+    ))
+;; (defn ->keyname
+;;   [o]
+;;   (pr-str o))
 
 (defn ->map
   [rec]

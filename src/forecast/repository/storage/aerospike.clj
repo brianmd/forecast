@@ -7,23 +7,25 @@
             [forecast.helpers :as h]
             [forecast.metrics :refer [bump]]
             )
-  (:import (com.aerospike.client AerospikeClient Key Bin Record Operation)
-           (com.aerospike.client.policy WritePolicy ClientPolicy GenerationPolicy
-                                        RecordExistsAction CommitLevel Policy BatchPolicy)
+  (:import (com.aerospike.client AerospikeClient Key Bin Record Operation Value)
+           (com.aerospike.client.query Statement Filter IndexType)
+           (com.aerospike.client.policy WritePolicy ClientPolicy GenerationPolicy QueryPolicy RecordExistsAction CommitLevel Policy BatchPolicy)
            (clojure.lang IPersistentMap)
            ))
 
 (defn setup!
-  [f]
-  (when-not
-   @aero/conn-atom
-   (let [host (or (System/getenv "AEROSPIKE_HOST") "192.168.0.213")
-         port (or (System/getenv "AEROSPIKE_PORT") 3000)
-         repo (aero/connect! host port)]
+  [init-commands-fn]
+  (log/info "0----------------- hey " @aero/conn-atom)
+  (when-not @aero/conn-atom
+    (let [_ (log/info "connecting ...")
+          host (or (System/getenv "AEROSPIKE_HOST") "192.168.0.213")
+          port (or (System/getenv "AEROSPIKE_PORT") 3000)
+          repo (aero/connect! host port)]
       (reset! aero/conn-atom repo)
       (aero/init-once! repo "test" "test-set")
-      (if f (f repo))))
+      (when init-commands-fn (init-commands-fn repo))))
   @aero/conn-atom)
+;; (close! nil)
 
 (defn close!
   [_]
@@ -45,13 +47,42 @@
 
 (defn query
   [repo set key]
-  (let [find-hashmap (first key)
-        recs  (q/query repo (q/mk-statement
-                                 {:ns "test" :set set}
-                                 (q/f-equal (first find-hashmap) (second find-hashmap))))
+  (println "--------------   query:")
+  (let [key-value (first key)
+        keyname (h/->keyname (first key-value))
+        value (second key-value)
+        _ (prn keyname)
+        _ (prn value)
+        recs  (q/query repo
+                       (q/mk-statement
+                        {:ns "test" :set set}
+                        ;; {:ns "test" :set set :index "ipid"}
+                        (q/f-equal keyname value)))
         ]
+    (log/info "count:" (count recs))
     (map h/->map recs)
     ))
+
+;; (setup! nil)
+;; (def s (q/mk-statement {:ns "test" :set "ip" :index "ipstate"}
+;; ;; (def s (q/mk-statement {:ns "test" :set "ip" }
+;;                        (q/f-equal "state" "new")))
+;; (def qu (q/query @aero/conn-atom s))
+;; (count qu)
+;; (type qu)
+;; (type (first qu))
+;; (map h/->map qu)
+
+;; (doseq [method (sort-by #(.getName %) (.getMethods (class (.key (first x)))))]
+;;   (println (.getName method) (seq (.getParameterTypes method))))
+
+;; (doseq [method (sort-by #(.getName %) (.getMethods (class (first qu))))]
+;;   (println (.getName method) (seq (.getParameterTypes method))))
+
+;; (.toString (first qu))
+;; (.record (first qu))
+;; (.bins (.record (nth qu 1)))
+;; (.key (nth qu 2))
 
 (defn find-all
   [repo set]
@@ -65,19 +96,20 @@
 (defn upsert-cols!
   "set key's value to map 'm'. retains keys not provided in m"
   [repo set key m]
-  (let [s (h/->keyname key)
-        ;; date (h/now)
-        ;; m (cond-> (assoc m :id s)
-        ;;     (not (contains? m :state)) (assoc :state "new"
-        ;;                                       :stated-on date
-        ;;                                       :created-on date)
-        ;;     )
+  (let [id (h/->keyname key)
         m (stringify-keys m)]
-    (aero/put! repo "test" set s m)
+    (aero/put! repo "test" set id m)
     ))
 
 
 ;; (setup!)
+
+;; date (h/now)
+;; m (cond-> (assoc m :id s)
+;;     (not (contains? m :state)) (assoc :state "new"
+;;                                       :stated-on date
+;;                                       :created-on date)
+;;     )
 
 ;; (def repo (aero/connect! "192.168.0.213" 3000))
 ;; (reset! aero/conn-atom repo)
@@ -198,12 +230,15 @@
 ;; (find-first-new "location")
 ;; (:z (find-first-new "location"))
 
-;; ;; (query/query @repo (query/mk-statement {:ns "test" :set "location" :index "locationid"} (query/f-equal "id" "abcd99")))
-;; ;; (query/query @repo (query/mk-statement {:ns "test" :set "location" :index "location-ndx"} (query/f-equal "state" "new")))
-;; (def x (query/query @repo (query/mk-statement {:ns "test" :set "location"} (query/f-equal "state" "new"))))
-;; (def x (query/query @repo (query/mk-statement {:ns "test" :set "location"} (query/f-equal "id" "abcd99"))))
+;; (query/query @repo (query/mk-statement {:ns "test" :set "location" :index "locationid"} (query/f-equal "id" "abcd99")))
+;; (query/query @repo (query/mk-statement {:ns "test" :set "location" :index "location-ndx"} (query/f-equal "state" "new")))
 
-;; (query/query @repo (query/mk-statement {:ns "test" :set "location"} (query/f-equal "id" "abcd99")))
+;; (def x (q/query @aero/conn-atom (q/mk-statement {:ns "test" :set "ip"} (q/f-equal "state" "new"))))
+;; (def x (q/query @aero/conn-atom (q/mk-statement {:ns "test" :set "ip"} (q/f-equal "id" "4"))))
+
+;; (def x (q/query @repo (q/mk-statement {:ns "test" :set "location"} (q/f-equal "id" "abcd99"))))
+
+;; (q/query @repo (q/mk-statement {:ns "test" :set "location"} (q/f-equal "id" "abcd99")))
 
 ;; (first x)
 ;; (count x)
@@ -216,6 +251,7 @@
 ;; (upsert! "location" "test1" {:z 4})
 ;; (find-first-new "location")
 ;; (.bins (.record (first x)))
+;; (.key (first x))
 
 
 
@@ -310,6 +346,7 @@
 
 (defn forecast-initial-commands
   [repo]
+  (log/info "creating indexes ....")
   (q/create-index! repo "test" "ip"       "ipid"          "id"    :string)
   (q/create-index! repo "test" "ip"       "ipstate"       "state" :string)
   (q/create-index! repo "test" "location" "locationid"    "id"    :string)
@@ -325,18 +362,79 @@
      :close!          (fn []
                         (close! @repo)
                         (reset! repo nil))
-     :find            (partial find repo set-name)
+     :find            (partial #'find repo set-name)
      :find-all        #(find-all repo set-name)
-     :query           (partial query repo set-name)
+     :query           (partial #'query repo set-name)
      :find-seq        identity
      :find-all-seq    identity
      :insert!         identity
      :update-replace! identity
-     :update-cols!    (partial upsert-cols! repo set-name)
+     ;; :update-cols!    (partial upsert-cols! repo set-name)
      :upsert-replace! identity
      :upsert-cols!    (partial upsert-cols! repo set-name)
      :delete!         identity
      :delete-all!     identity
      }))
 
+
+
 ;; (close! nil)
+;; (setup! forecast-initial-commands)
+;; (def r @aero/conn-atom)
+;; (upsert-cols! r "ip" :a {:state "blue" :id "a"})
+;; (upsert-cols! r "ip" :b {:state "blue" :id "b"})
+;; (upsert-cols! r "ip" :c {:state "blue" :id "c"})
+;; (upsert-cols! r "ip" :d {:state "blue" :id "d"})
+;; (query r "ip" {:state "blue"})
+
+;; (upsert-cols! r "ip" :z {:state "green" :id "b"})
+;; (query r "ip" {:state "green"})
+
+
+;; recs  (q/query repo
+;; (log/info "count:" (count recs))
+;; (map h/->map recs)
+
+
+
+;; get new connection, ensure state index exists
+;; (close! nil)
+;; (setup! forecast-initial-commands)
+;; (def r @aero/conn-atom)
+
+;; ;; insert rows
+;; (.put r
+;;       (WritePolicy.)
+;;       (Key. "test" "ip" "r")
+;;       (into-array Bin [(Bin. "state" "blue") (Bin. "id" "k")])
+;;       )
+;; (.put r
+;;       (WritePolicy.)
+;;       (Key. "test" "ip" "s")
+;;       (into-array Bin [(Bin. "state" "blue") (Bin. "id" "s")])
+;;       )
+;; (.put r
+;;       (WritePolicy.)
+;;       (Key. "test" "ip" "t")
+;;       (into-array Bin [(Bin. "state" "blue") (Bin. "id" "t")])
+;;       )
+
+;; ;; query for those rows
+;; (do
+;;   (def stmt (Statement.))
+;;   (.setNamespace stmt "test")
+;;   (.setSetName stmt "ip")
+;;   (.setFilters stmt (into-array
+;;                      com.aerospike.client.query.Filter
+;;                      [(com.aerospike.client.query.Filter/equal "state" "blue")]
+;;                      ))
+;;   (def blue-query (.query r (com.aerospike.client.policy.QueryPolicy.) stmt))
+;;   (def recs (doall (iterator-seq (.iterator blue-query))))
+;;   recs
+;;   )
+;; (.iterator blue-query)
+;; (count recs)
+;; (first recs)
+;; (-> (first recs) .key .namespace)
+;; (-> (first recs) .key .setName)
+;; (-> (first recs) .key .userKey)

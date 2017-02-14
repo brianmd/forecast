@@ -6,6 +6,8 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/core.async "0.2.395"]
 
+                 [com.aerospike/aerospike-client "3.3.0"]
+
                  [org.clojure/tools.logging "0.3.1"]
                  [ch.qos.logback/logback-classic "1.2.1"]
 
