@@ -60,7 +60,6 @@
     (infinite-loop
      #(do
         (Thread/sleep 1000)
-        (println "\n\n...................... process-new-ips")
         (process-new-ips)
         ))))
   (.start
@@ -68,7 +67,6 @@
     (infinite-loop
      #(do
         (Thread/sleep 1000)
-        (println "\n\n\n\n...................... process-new-locations\n\n\n")
         (process-new-locations)
         ))))
   )
