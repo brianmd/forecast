@@ -62,7 +62,7 @@
   (println "--------------   query:")
   (let [key-value (first key)
         ;; keyname (h/->keyname (first key-value))
-        keyname (first key-value)
+        keyname (name (first key-value))
         value (second key-value)
         _ (prn keyname)
         _ (prn value)

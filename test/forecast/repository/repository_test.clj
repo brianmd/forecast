@@ -41,7 +41,7 @@
       ;; (is (= {:x {:state "new" :g 4}} (repo/query r {:g 4})))
 
       (is (= {:x {:state "new" :id "4"} :y {:state "new"}}
-             (repo/query r {"state" "new"})))
+             (repo/query r {:state "new"})))
       )
     ))
 
