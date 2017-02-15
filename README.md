@@ -18,3 +18,14 @@ There are two ways to run this:
 
 If you used a previous version of this, you'll need to run _./build.sh_, or even better, _docker rmi forecast__.
 
+## Logfiles
+
+Three example logfiles are provided in the data directory:
+
+- __logfile__, one invalid ip address, ten good addresses, and three duplicate ip addresses. Histogram should have temperatures for only the ten valid, unique addresses.
+- __logfile2__, has the ten valid addresses from _logfile_ plus ten more. Processing _logfile_ and _logfile2_ multiple times should leave a histogram with 20 entries.
+- __logfile-big__, has 4082 entries.
+
+The logfile for this program (how meta) is data/log.log.
+
+
