@@ -14,5 +14,5 @@ if [[ ! -z "$1" ]]; then
   dockerlogfile=dockerlog
 fi
 
-docker run -it --rm -v $PWD/data:/usr/src/app/data -e "WEATHER_API=$WEATHER_API" --name fore forecast java -jar app-standalone.jar $dockerlogfile $2 $3 --process --hist
+docker run -it --rm -v $PWD/data:/usr/src/app/data -e "WEATHER_API=$WEATHER_API" --name fore forecast java -jar app-standalone.jar $dockerlogfile $2 $3 --process
 
