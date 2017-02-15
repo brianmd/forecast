@@ -35,11 +35,7 @@
       (is (= {:state "new" :id "4"} (find r :x)))
       )
 
-      ;; (is (= #{{:f 4} {:f 4 :g 4}} (set (repo/find-all r))))
-
     (testing "query"
-      ;; (is (= {:x {:state "new" :g 4}} (repo/query r {:g 4})))
-
       (is (= {:x {:state "new" :id "4"} :y {:state "new"}}
              (repo/query r {:state "new"})))
       )

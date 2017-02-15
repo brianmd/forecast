@@ -39,15 +39,15 @@
         key (h/->keyname lat-long)]
     (try
       (do
-        (r/upsert-cols! @location-repo key {"state" "processing"})
+        (r/upsert-cols! @location-repo key {:state "processing"})
         (let [forecast (r/find @location-repo key)]
           (if (and forecast (:temp forecast))
             forecast
             (let [forecast (@forecast-service key)]
-              (r/upsert-cols! @location-repo key {:temp forecast "state" "done"})
+              (r/upsert-cols! @location-repo key {:temp forecast :state "done"})
               forecast))))
       (catch Throwable e
-        (r/upsert-cols! @location-repo key {"state" "error"})
+        (r/upsert-cols! @location-repo key {:state "error"})
         (log/errorf e "ill-formed location:  %s" location)
         ))))
 ;; (find-forecast 3)
@@ -55,31 +55,17 @@
 ;; (h/add-state "xx" {:temp 3})
 
 (defn new-maps []
-  (r/query @location-repo {"state" "new"}))
+  (r/query @location-repo {:state "new"}))
 (defn done-maps []
-  (r/query @location-repo {"state" "done"}))
+  (r/query @location-repo {:state "done"}))
 
 (defn new-locations []
-  ;; (map #(select-keys % [:latitude :longitude]) (r/query @location-repo {"state" "new"})))
-  (map #(select-keys % [:latitude :longitude]) (vals (r/query @location-repo {"state" "new"}))))
-  ;; (map identity (r/query @location-repo {"state" "new"})))
-  ;; (map second (r/query @location-repo {"state" "new"})))
+  (map #(select-keys % [:latitude :longitude]) (vals (r/query @location-repo {:state "new"}))))
 
 (defn done-temperatures []
-  ;; (map :temp (r/query @location-repo {"state" "done"})))
-  (map :temp (vals (r/query @location-repo {"state" "done"}))))
+  (map :temp (vals (r/query @location-repo {:state "done"}))))
 
 ;; set defaults
 (use-memory-storage)
 (use-random-service)
 
-;; (store-location {:a 3})
-;; (:repo @location-repo)
-;; (new-maps)
-;; (done-maps)
-;; (vals (new-maps))
-;; (new-locations)
-;; (done-temperatures)
-
-
-;; (use-aerospike-storage)

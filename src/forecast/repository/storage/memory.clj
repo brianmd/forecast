@@ -16,6 +16,7 @@
   [repo key-val]
   (let [key (first (first key-val))
         val (second (first key-val))]
+    ;; (prn [key-val key val])
     (into {}
           (filter (fn [[k v]] (= val (get v key))) @repo))
     ))
@@ -39,16 +40,16 @@
         metrics (atom {})]
     {:repo            repo
      :metrics         metrics
-     :find            (partial find repo)
+     :find            (partial #'find repo)
      :find-all        #(find-all repo)
-     :query           (partial query repo)
+     :query           (partial #'query repo)
      :find-seq        identity
      :find-all-seq    identity
      :insert!         identity
      :update-replace! identity
-     :update-cols!    (partial upsert-cols! repo)
+     :update-cols!    (partial #'upsert-cols! repo)
      :upsert-replace! identity
-     :upsert-cols!    (partial upsert-cols! repo)
+     :upsert-cols!    (partial #'upsert-cols! repo)
      :delete!         identity
      :delete-all!     identity
      }))

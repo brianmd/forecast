@@ -45,14 +45,6 @@
   (when hashmap
     (keywordize-keys (zipmap (.keySet hashmap) (.values hashmap)))))
 
-;; (defn ->keyname
-;;   [o]
-;;   (cond
-;;     (string? o) o
-;;     (keyword? o) (name o)
-;;     (number? o) (str o)
-;;     :else (str "~edn" (pr-str o))
-;;     ))
 (defn ->keyname
   [o]
   (pr-str o))
@@ -66,10 +58,10 @@
 
 (defn add-state
   [key m]
-  (let [s (->keyname key)
+  (let [; s (->keyname key)
         date (now)
-        m (cond-> (assoc m :id s)
-            (not (contains? m :state)) (assoc "state" "new"
+        m (cond-> (assoc m :id key)
+            (not (contains? m :state)) (assoc :state "new"
                                               :stated-on date
                                               :created-on date)
             )
