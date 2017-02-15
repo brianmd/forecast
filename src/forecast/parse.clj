@@ -1,5 +1,5 @@
 (ns forecast.parse
-  (:require [clojure.string :refer [split]]
+  (:require [clojure.string :as string]
             [clojure.java.io]
             [clojure.tools.logging :as log]
             [clojure.core.async :refer [go]]
@@ -32,7 +32,7 @@
   [line]
   (->
    line
-   (split #"\t")
+   (string/split #"\t")
    (nth 23)          ;; ip address
    ip/store-ip
    ))

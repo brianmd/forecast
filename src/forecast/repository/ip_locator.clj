@@ -1,5 +1,6 @@
 (ns forecast.repository.ip-locator
   (:require [clojure.tools.logging :as log]
+            [clojure.string :as string]
             [forecast.helpers :as h :refer [valid-ip? bump now]]
             [forecast.repository.repository :as r]
 
@@ -29,8 +30,9 @@
   (reset! locate-service #'ipinfo-io/find-location))
 
 (defn store-ip
-  [ip]
-  (r/upsert-cols! @ip-repo ip (h/add-state ip {})))
+  [ips]
+  (doseq [ip (map string/trim (string/split ips #","))]
+    (r/upsert-cols! @ip-repo ip (h/add-state ip {}))))
 
 (defn find-location
   [ip]
