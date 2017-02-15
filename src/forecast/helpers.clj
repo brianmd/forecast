@@ -3,14 +3,39 @@
             [clojure.walk :refer [keywordize-keys]]
             [forecast.metrics :as metrics]
             )
-  (:import [org.jfree.data.statistics HistogramDataset]))
+  (:import [org.jfree.data.statistics HistogramDataset]
+           [java.net InetAddress]
+           ))
 
-(def ip-regex
-  #"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")
+;; (def ip-regex
+;;   #"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")
+
+;; (defn valid-ip?
+;;   [ip]
+;;   (not (or (nil? ip) (nil? (re-matches ip-regex ip)))))
 
 (defn valid-ip?
-  [ip]
-  (not (or (nil? ip) (nil? (re-matches ip-regex ip)))))
+  [ip-addr]
+  (try
+    (let [bytes (->> (clojure.string/split ip-addr #"\.")
+                     (map read-string)
+                     byte-array
+                     )
+          inet-addr (InetAddress/getByAddress bytes)
+          ]
+      (not
+       (or
+        (.isAnyLocalAddress inet-addr)
+        ;; oddly, "710.9.0.124" becomes a valid ip address of "/198.9.0.124"
+        (not (= ip-addr (.getHostAddress inet-addr)))
+        (.isLoopbackAddress inet-addr)
+        (.isSiteLocalAddress inet-addr)
+        )))
+    (catch Throwable e
+      false)))
+;; (map is-valid? ["8.8.8.8" "127.0.0.1" "10.9.0.124" "710.9.0.124"])
+
+
 
 (def lat-long-8.8.8.8 {:latitude 37.386 :longitude -122.0838})
 

@@ -45,13 +45,13 @@
             (forecast/store-location lat-long)
             lat-long)))
       (do
-        (log/errorf "ill-formed ip address: %s" ip)
+        (log/errorf "ill-formed or local ip address: %s" ip)
         (r/upsert-cols! @ip-repo ip {:state "error"})
         {:error (str "ill-formed ip address: " ip)})
       )
     (catch Throwable e
       (r/upsert-cols! @ip-repo ip {:state "error"})
-      (log/errorf e "ill-formed ip address: %s" ip)
+      (log/errorf e "ill-formed or local ip address: %s" ip)
       )))
 
 (defn new-ips []
