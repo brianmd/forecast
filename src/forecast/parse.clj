@@ -58,8 +58,13 @@
    #(do
       (Thread/sleep 1000)
       (process-new-ips)
+      ))
+  (infinite-loop
+   #(do
+      (Thread/sleep 1000)
       (process-new-locations)
-      )))
+      ))
+  )
 
 (defn get-histogram
   [num-bins]

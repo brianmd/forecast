@@ -9,22 +9,8 @@ A weather api will be needed, which may be acquired by signing up on https://ope
 
 ## Usage
 
-```sh
-WEATHER_API=apikey ./run log-filename-to-parse [num-bins [--live]]
-```
+There are two ways to run this:
 
-For example, this command will make 10 location and weather calls to api servers (there are 11 lines, one of which does not have a valid ip address):
-```sh
-WEATHER_API=apikey ./run data/logfile 5 --live
-```
-
-while this command will generate 4080 locations and forecasts (not live, 4082 lines, 2 of which are not valid).
-
-Note the removal of '--live' soas not to overrun the free level of the services.
-```sh
-WEATHER_API=apikey ./run data/logfile-big 10
-```
-
-The above log files are supplied, but you may use any file path.
-
+- [memory version](doc/memory.md), uses a memory repository for holding the ip and location information,
+- [aerospike version](doc/aero.md), uses, well, an aerospike repository.
 
