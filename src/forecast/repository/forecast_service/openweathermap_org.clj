@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]
             [cheshire.core :refer [parse-string]]
             [clojure.walk :refer [keywordize-keys]]
-            [forecast.helpers :refer [bump]]
+            [forecast.helpers :as h]
             )
   (:import [java.util Calendar]))
 
@@ -20,9 +20,10 @@
 
 (defn find-forecast
   [location]
-  (bump [:location :service-finds])
+  (h/bump [:location :service-finds])
   (try
-    (let [url (str "http://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=" (:latitude location) "&lon=" (:longitude location) "&APPID=" (api))
+    (let [location (if (string? location) (read-string location) location)
+          url (str "http://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=" (:latitude location) "&lon=" (:longitude location) "&APPID=" (api))
           response (client/get url {:accept :json :socket-timeout 1000 :conn-timeout 1000})
           day (re-pattern (str (tomorrow) ".*"))
           ]

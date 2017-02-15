@@ -5,4 +5,4 @@
 (defn find-forecast
   [location]
   (bump [:location :service-finds])
-  (+ 25 (rand 50)))
+  (+ 25 (rand 100)))

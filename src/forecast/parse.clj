@@ -2,6 +2,7 @@
   (:require [clojure.string :refer [split]]
             [clojure.java.io]
             [clojure.tools.logging :as log]
+            [clojure.core.async :refer [go]]
 
             [forecast.helpers :as h]
             [forecast.metrics :as metrics]
@@ -54,16 +55,22 @@
 
 (defn daemon
   []
-  (infinite-loop
-   #(do
-      (Thread/sleep 1000)
-      (process-new-ips)
-      ))
-  (infinite-loop
-   #(do
-      (Thread/sleep 1000)
-      (process-new-locations)
-      ))
+  (.start
+   (Thread.
+    (infinite-loop
+     #(do
+        (Thread/sleep 1000)
+        (println "\n\n...................... process-new-ips")
+        (process-new-ips)
+        ))))
+  (.start
+   (Thread.
+    (infinite-loop
+     #(do
+        (Thread/sleep 1000)
+        (println "\n\n\n\n...................... process-new-locations\n\n\n")
+        (process-new-locations)
+        ))))
   )
 
 (defn get-histogram
@@ -101,16 +108,13 @@
 ;;   )
 
 (defn use-live []
-  (println "using live services")
   (ip/use-ipinfo-service)
   (location/use-openweather-service))
 
 (defn parse-args
   [params]
-  (println "parsing args ...")
   (metrics/reset-metrics)
   (let [args (set params)]
-    (prn args)
     ;; setup
     (when (contains? args "--aero")
       (println "using aerospike")
@@ -120,7 +124,7 @@
       (use-live))
 
     ;; process file
-    (when-not (= \- (first params))
+    (when-not (and (first params) (= \- (-> params first first)))
       (println "load file")
       (parse-logfile (first params) log-parser))
 
@@ -128,15 +132,15 @@
     (when (contains? args "--process")
       (println "processing ...")
       (process-new-ips)
-      (process-new-locations))
+      (process-new-locations)
+      )
     (when (contains? args "--daemon")
       (println "setting up a daemon")
       (daemon))
     (when (contains? args "--hist")
-      (let [num-bins (if (= \- (second params))
+      (let [num-bins (if (= \- (-> params second first))
                        5
                        (read-string (second params)))]
-        (println num-bins)
         (print-histogram num-bins)))
     ))
 

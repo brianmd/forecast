@@ -14,9 +14,4 @@ if ! ( docker images | grep forecast >/dev/null ); then
     ./build.sh
 fi
 
-if [[ ! -z "$1" ]]; then
-    cp "$1" data/dockerlog || exit 1
-    dockerlogfile=dockerlog
-fi
-
-docker run -it --rm -v $PWD/data:/usr/src/app/data:ro -e "WEATHER_API=$WEATHER_API" -e AEROSPIKE_HOST=aero --link aero:forecast-aero --name fore-daemon forecast java -jar app-standalone.jar --daemon --aero $@
+docker run -it --rm -v $PWD/data:/usr/src/app/data -e "WEATHER_API=$WEATHER_API" -e AEROSPIKE_HOST=aero --link forecast-aero:aero --name fore-daemon forecast java -jar app-standalone.jar --daemon --aero $@

@@ -73,7 +73,6 @@
 
 (defn forecast-initial-commands
   [repo]
-  (log/info "ensuring indexes exist ....")
   (q/create-index! repo "test" "ip"       "ipstate"       "state" :string)
   (q/create-index! repo "test" "location" "locationstate" "state" :string)
   )
