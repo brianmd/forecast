@@ -24,7 +24,13 @@
           {:error (str "error response for ip (" (:status response) ")")})
         ))
     (catch Throwable e
-      (log/errorf e "error in ipinfo-io/find-location: %s" ip)
+      (if (re-find #"(?m)^.*status 429.*$" (str e))
+        (log/errorf "too many requests to ipinfo-io: %s" ip)
+        (log/errorf e "error in ipinfo-io/find-location eee: %s" ip))
       {:error (str e)})))
 
+;; (try (/ 1 0) (catch Throwable e
+;;                (str e)
+;;                (throw e)
+;;                ))
 

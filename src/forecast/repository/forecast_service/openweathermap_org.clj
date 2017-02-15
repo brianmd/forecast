@@ -37,7 +37,9 @@
          )
         {:error (str "error response for location (" (:status response) ", " (:body response) ")")}
         ))
-    (catch Exception e
-      (log/errorf e "error in openweathermap/find-forecast: %s" location)
+    (catch Throwable e
+      (if (re-find #"(?m)^.*status 502.*$" (str e))
+        (log/errorf "too many requests to openweathermap.com: %s" location)
+        (log/errorf e "error in openweathermap/find-forecast eee: %s" location))
       {:error (str e)})))
 
