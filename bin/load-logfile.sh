@@ -9,5 +9,5 @@ if [[ ! -z "$1" ]]; then
     dockerlogfile=dockerlog
 fi
 
-docker run -it --rm -v $PWD/data:/usr/src/app/data --link forecast-aero:aero -e AEROSPIKE_HOST=aero --name load-log forecast java -jar app-standalone.jar $dockerlogfile --aero --process $@
+docker run -it --rm -v $PWD/data:/usr/src/app/data --link forecast-aero:aero -e WEATHER_API=$WEATHER_API -e AEROSPIKE_HOST=aero --name load-log forecast java -jar app-standalone.jar $dockerlogfile --aero --process $@
 

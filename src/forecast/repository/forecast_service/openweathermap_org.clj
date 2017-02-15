@@ -9,7 +9,7 @@
 
 (defn api
   []
-  (or (System/getenv "WEATHER_API") (throw "Must set WEATHER_API envrionment variable. Sign up at http://www.openweathermap.com/.")))
+  (or (System/getenv "WEATHER_API") (throw (Exception. "Must set WEATHER_API envrionment variable. Sign up at http://www.openweathermap.com/."))))
 
 (defn tomorrow
   "return tomorrow's date as a string in yyyy-mm-dd format"
