@@ -40,6 +40,6 @@
     (catch Throwable e
       (if (re-find #"(?m)^.*status 502.*$" (str e))
         (log/errorf "too many requests to openweathermap.com: %s" location)
-        (log/errorf e "error in openweathermap/find-forecast eee: %s" location))
+        (log/errorf e "error in openweathermap/find-forecast: %s" location))
       {:error (str e)})))
 

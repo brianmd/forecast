@@ -43,8 +43,12 @@
           location
           (let [_ (r/upsert-cols! @ip-repo ip {:state "processing"})
                 lat-long (@locate-service ip)]
-            (r/upsert-cols! @ip-repo ip (merge {:state "done" :retrieved-on (now)} lat-long))
-            (forecast/store-location lat-long)
+            (if (and (map? lat-long) (contains? lat-long :error))
+              (r/upsert-cols! @ip-repo ip (merge {:state "error" :retrieved-on (now)} lat-long))
+              (do
+                (r/upsert-cols! @ip-repo ip (merge {:state "done" :retrieved-on (now)} lat-long))
+                (forecast/store-location lat-long)
+                ))
             lat-long)))
       (do
         (log/errorf "ill-formed or local ip address: %s" ip)

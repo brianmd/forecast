@@ -51,3 +51,5 @@ will be shown for all data that has been processed to that time.
 Ip locations don't change often, so the associated location doesn't need to be looked up very often. However, tomorrow's forecast does change and should be recalculated at least daily, and perhaps more often. This implementation doesn't account for time.
 
 You'll see both "id" and "\_id" data in the sets (tables), both of which contain the key of the row. Aerospike doesn't seem to return the key on queries, so my first pass was to add it as a bin named "ip". However, I wanted aerospike queries to function identitically with memory queries, the latter of which does provide the key as well as the row. To accomodate this (and to make the tests pass!), I add "\_id" behind the scenes to the row in the repository code, and remove it when passing it back to the client. "ip" may now be removed.
+
+I wanted to allow arbitrary types for the bin userKeys and values, but didn't go quite that far as it wasn't needed for this exercise.
