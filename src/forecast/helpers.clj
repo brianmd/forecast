@@ -45,17 +45,20 @@
   (when hashmap
     (keywordize-keys (zipmap (.keySet hashmap) (.values hashmap)))))
 
-(defn ->keyname
-  [o]
-  (cond
-    (string? o) o
-    (keyword? o) (name o)
-    (number? o) (str o)
-    :else (str "~edn" (pr-str o))
-    ))
 ;; (defn ->keyname
 ;;   [o]
-;;   (pr-str o))
+;;   (cond
+;;     (string? o) o
+;;     (keyword? o) (name o)
+;;     (number? o) (str o)
+;;     :else (str "~edn" (pr-str o))
+;;     ))
+(defn ->keyname
+  [o]
+  (pr-str o))
+(defn <-keyname
+  [o]
+  (read-string o))
 
 (defn ->map
   [rec]

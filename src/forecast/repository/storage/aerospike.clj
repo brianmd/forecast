@@ -21,9 +21,9 @@
           host (or (System/getenv "AEROSPIKE_HOST") "192.168.0.213")
           port (or (System/getenv "AEROSPIKE_PORT") 3000)
           repo (aero/connect! host port)]
-      (reset! aero/conn-atom repo)
-      (aero/init-once! repo "test" "test-set")
-      (when init-commands-fn (init-commands-fn repo))))
+      (reset! aero/conn-atom repo)))
+  (aero/init-once! @aero/conn-atom "test" "test-set")
+  (when init-commands-fn (init-commands-fn @aero/conn-atom))
   @aero/conn-atom)
 ;; (close! nil)
 
@@ -35,6 +35,15 @@
       (catch Throwable e))
     (reset! aero/conn-atom nil)))
 
+(defn upsert-cols!
+  "set key's value to map 'm'. retains keys not provided in m"
+  [repo set key m]
+  (let [id (h/->keyname key)
+        m (stringify-keys m)]
+    (aero/put! repo "test" set id
+               (assoc m "_id" id))
+    ))
+
 (defn find
   "finds record with id 'key'"
   [repo set key]
@@ -42,14 +51,18 @@
     (let [m (aero/get repo "test" set k)]
       ;; convert back to clojure-type keys
       ;; (if m (keywordize-keys (zipmap (.keySet m) (.values m))))
-      (if m (keywordize-keys (into {} m)))
+      ;; (if m (keywordize-keys (into {} m)))
+      (if m (-> (into {} m) keywordize-keys (dissoc :_id)))
       )))
+;; (upsert-cols! @aero/conn-atom "ip" "97.68.237.19" {"x" {:a 3}})
+;; (find @aero/conn-atom "ip" "97.68.237.19")
 
 (defn query
   [repo set key]
   (println "--------------   query:")
   (let [key-value (first key)
-        keyname (h/->keyname (first key-value))
+        ;; keyname (h/->keyname (first key-value))
+        keyname (first key-value)
         value (second key-value)
         _ (prn keyname)
         _ (prn value)
@@ -60,8 +73,12 @@
                         (q/f-equal keyname value)))
         ]
     (log/info "count:" (count recs))
-    (map h/->map recs)
+    (let [recs (map h/->map recs)]
+      (into {} (map #(vector (read-string (:_id %)) (dissoc % :_id))) recs))
     ))
+;; (query @aero/conn-atom "ip" {"state" "new"})
+;; (first (query @aero/conn-atom "ip" {"state" "new"}))
+;; (count (query @aero/conn-atom "ip" {"state" "new"}))
 
 ;; (setup! nil)
 ;; (def s (q/mk-statement {:ns "test" :set "ip" :index "ipstate"}
@@ -92,14 +109,6 @@
       (if m (keywordize-keys (into {} m)))
       ))
 ;; (aero/get @forecast.repository.ip-locator/ip-repo "test" "ip")
-
-(defn upsert-cols!
-  "set key's value to map 'm'. retains keys not provided in m"
-  [repo set key m]
-  (let [id (h/->keyname key)
-        m (stringify-keys m)]
-    (aero/put! repo "test" set id m)
-    ))
 
 
 ;; (setup!)
@@ -347,9 +356,10 @@
 (defn forecast-initial-commands
   [repo]
   (log/info "creating indexes ....")
-  (q/create-index! repo "test" "ip"       "ipid"          "id"    :string)
+  ;; (q/create-index! repo "test" "ip"       "ipid"          "id"    :string)
+  (prn repo)
   (q/create-index! repo "test" "ip"       "ipstate"       "state" :string)
-  (q/create-index! repo "test" "location" "locationid"    "id"    :string)
+  ;; (q/create-index! repo "test" "location" "locationid"    "id"    :string)
   (q/create-index! repo "test" "location" "locationstate" "state" :string)
   )
 
