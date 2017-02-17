@@ -123,8 +123,8 @@
       (use-live))
 
     ;; load logfile
-    (when-not (and process? (first params) (= \- (-> params first first)))
-      (println "load file")
+    (when (and process? (not (= \- (-> params first first))))
+      (println "load file " (first params))
       (parse-logfile (first params) log-parser))
 
     ;; post processing
