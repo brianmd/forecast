@@ -42,7 +42,9 @@
         (r/upsert-cols! @location-repo key {:state "processing"})
         (let [forecast (r/find @location-repo key)]
           (if (and forecast (:temp forecast))
-            forecast
+            (do
+              (r/upsert-cols! @location-repo key (assoc forecast :state "done"))
+              forecast)
             (let [forecast (@forecast-service key)]
               (r/upsert-cols! @location-repo key {:temp forecast :state "done"})
               forecast))))
