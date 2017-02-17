@@ -68,8 +68,7 @@
      #(do
         (Thread/sleep 1000)
         (process-new-locations)
-        ))))
-  )
+        )))))
 
 (defn get-histogram
   [num-bins]
@@ -112,7 +111,9 @@
 (defn parse-args
   [params]
   (metrics/reset-metrics)
-  (let [args (set params)]
+  (let [args (set params)
+        process? (contains? args "--process")
+        num-bins-location (if process? second first)]
     ;; setup
     (when (contains? args "--aero")
       (println "using aerospike")
@@ -121,13 +122,13 @@
       (println "using live services")
       (use-live))
 
-    ;; process file
-    (when-not (and (first params) (= \- (-> params first first)))
+    ;; load logfile
+    (when-not (and process? (first params) (= \- (-> params first first)))
       (println "load file")
       (parse-logfile (first params) log-parser))
 
     ;; post processing
-    (when (contains? args "--process")
+    (when process?
       (println "processing ...")
       (process-new-ips)
       (process-new-locations)
@@ -136,7 +137,7 @@
       (println "setting up a daemon")
       (daemon))
     (when (contains? args "--hist")
-      (let [num-bins (if (= \- (-> params second first))
+      (let [num-bins (if (= \- (-> params num-bins-location first))
                        5
                        (read-string (second params)))]
         (print-histogram num-bins)))
