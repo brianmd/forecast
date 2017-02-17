@@ -139,7 +139,7 @@
     (when (contains? args "--hist")
       (let [num-bins (if (= \- (-> params num-bins-location first))
                        5
-                       (read-string (second params)))]
+                       (read-string (num-bins-location params)))]
         (print-histogram num-bins)))
     ))
 
