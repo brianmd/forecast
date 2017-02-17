@@ -46,36 +46,35 @@
   []
   (doseq [loc (location/new-locations)]
     (location/find-forecast loc)))
-;; (doseq [loc (location/new-locations)] (println loc))
 
-(defn infinite-loop [f]
-  (f)
-  (future (infinite-loop f))
-  nil)
+(def stop-threads? (atom false))
+
+(defn infinite-loop
+  ([f] (infinite-loop f nil))
+  ([f delay]
+   (go
+     (loop []
+       (f)
+       (if delay (Thread/sleep delay))
+       (when-not @stop-threads? (recur))
+       ))))
+
+(defn sleep-forever []
+  (loop []                           ;; prevent program from closing
+    (Thread/sleep 1e9)
+    (recur)))
 
 (defn daemon
   []
-  (.start
-   (Thread.
-    (infinite-loop
-     #(do
-        (Thread/sleep 1000)
-        (process-new-ips)
-        ))))
-  (.start
-   (Thread.
-    (infinite-loop
-     #(do
-        (Thread/sleep 1000)
-        (process-new-locations)
-        )))))
+  (infinite-loop process-new-ips 1000)
+  (infinite-loop process-new-locations 1000)
+  (sleep-forever))
 
 (defn get-histogram
   [num-bins]
   (let [temps (location/done-temperatures)]
     (if (empty? temps)
       []
-      ;; (h/histogram (map :temp temps) num-bins))))
       (h/histogram temps num-bins))))
 
 (defn print-histogram
@@ -89,20 +88,6 @@
       (println "no temperatures found"))
     )
   )
-
-;; (defn run
-;;   [filename num-bins]
-;;   (println "\n\n-------------")
-;;   (metrics/reset-metrics)
-;;   ;; (memory/clear)
-;;   (parse-logfile filename log-parser)
-;;   (process-new-ips)
-;;   (process-new-locations)
-;;   ;; (metrics/print-metrics)
-;;   ;; (println "ip metrics:" (:metrics @ip/ip-repo))
-;;   ;; (println "location metrics: " (:metrics @location/location-repo))
-;;   (print-histogram)
-;;   )
 
 (defn use-live []
   (ip/use-ipinfo-service)
