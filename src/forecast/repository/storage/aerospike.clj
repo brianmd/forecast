@@ -17,7 +17,7 @@
   [init-commands-fn]
   (when-not @aero/conn-atom
     (let [_ (log/info "connecting ...")
-          host (or (System/getenv "AEROSPIKE_HOST") "192.168.0.213")
+          host (or (System/getenv "AEROSPIKE_HOST") "127.0.0.1")
           port (or (System/getenv "AEROSPIKE_PORT") 3000)
           repo (aero/connect! host port)]
       (reset! aero/conn-atom repo)))
@@ -49,8 +49,6 @@
   (let [k (h/->keyname key)]
     (let [m (aero/get repo "test" set k)]
       ;; convert back to clojure-type keys
-      ;; (if m (keywordize-keys (zipmap (.keySet m) (.values m))))
-      ;; (if m (keywordize-keys (into {} m)))
       (if m (-> (into {} m) keywordize-keys (dissoc :_id)))
       )))
 
@@ -62,7 +60,6 @@
         recs  (q/query repo
                        (q/mk-statement
                         {:ns "test" :set set}
-                        ;; {:ns "test" :set set :index "ipid"}
                         (q/f-equal keyname value)))
         ]
     (let [recs (map h/->map recs)]
@@ -81,7 +78,8 @@
   [set-name]
   (let [repo (setup! forecast-initial-commands)
         metrics (atom {})]
-    {:repo            repo
+    {:type            :aerospike
+     :repo            repo
      :metrics         metrics
      :close!          (fn []
                         (close! @repo)

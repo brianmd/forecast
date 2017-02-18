@@ -59,6 +59,11 @@
        (when-not @stop-threads? (recur))
        ))))
 
+(defn print-metrics []
+  (h/log-it "ip metrics: " @(:metrics @ip/ip-repo))
+  (h/log-it "location metrics: " @(:metrics @location/location-repo))
+  )
+
 (defn sleep-forever []
   (loop []                           ;; prevent program from closing
     (Thread/sleep 1e9)
@@ -68,6 +73,7 @@
   []
   (infinite-loop process-new-ips 1000)
   (infinite-loop process-new-locations 1000)
+  (infinite-loop print-metrics 15000)
   (sleep-forever))
 
 (defn get-histogram
@@ -97,24 +103,26 @@
   [params]
   (metrics/reset-metrics)
   (let [args (set params)
+        load? (contains? args "--load")
         process? (contains? args "--process")
         num-bins-location (if process? second first)]
     ;; setup
     (when (contains? args "--aero")
-      (println "using aerospike")
+      (h/log-it "using aerospike")
       (use-aerospike-storage))
     (when (contains? args "--live")
-      (println "using live services")
+      (h/log-it "using live services")
       (use-live))
 
     ;; load logfile
-    (when (and process? (not (= \- (-> params first first))))
-      (println "load file " (first params))
+    (when (and (or load? process?)
+               (not (= \- (-> params first first))))
+      (h/log-it "load file " (first params))
       (parse-logfile (first params) log-parser))
 
     ;; post processing
     (when process?
-      (println "processing ...")
+      (h/log-it "processing ...")
       (process-new-ips)
       (process-new-locations)
       )

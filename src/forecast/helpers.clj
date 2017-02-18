@@ -1,18 +1,17 @@
 (ns forecast.helpers
   (:require [clojure.tools.logging :as log]
             [clojure.walk :refer [keywordize-keys]]
+            [clojure.tools.logging :as log]
+
             [forecast.metrics :as metrics]
             )
   (:import [org.jfree.data.statistics HistogramDataset]
            [java.net InetAddress]
            ))
 
-;; (def ip-regex
-;;   #"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")
-
-;; (defn valid-ip?
-;;   [ip]
-;;   (not (or (nil? ip) (nil? (re-matches ip-regex ip)))))
+(defn log-it [& args]
+  (log/info (pr-str args))
+  (last args))
 
 (defn valid-ip?
   [ip-addr]

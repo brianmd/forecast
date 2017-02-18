@@ -6,7 +6,7 @@
 
 (defn find-location
   [ip]
-  (bump [:ip :service-finds])
+  (bump :location-service-finds)
   (let [lat (+ (first lat-range) (rand (- (apply - lat-range))))
         long (+ (first long-range) (rand (- (apply - long-range))))]
     {:latitude lat :longitude long}))

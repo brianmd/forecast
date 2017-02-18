@@ -62,8 +62,6 @@
 
 (defn new-ips []
   (map (comp :id second) (r/query @ip-repo {:state "new"})))
-r/query @ip-repo {:state "new"}
-(:repo @ip-repo)
 
 ;; set defaults
 (use-memory-storage)

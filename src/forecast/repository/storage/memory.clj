@@ -38,8 +38,10 @@
   [table-name]
   (let [repo (atom {})
         metrics (atom {})]
-    {:repo            repo
+    {:type            :memory
+     :repo            repo
      :metrics         metrics
+     :close!          (fn [& _] (reset! repo {}))
      :find            (partial #'find repo)
      :find-all        #(find-all repo)
      :query           (partial #'query repo)

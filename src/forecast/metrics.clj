@@ -1,5 +1,7 @@
 (ns forecast.metrics
-  (:require [clojure.pprint :refer [pprint]]))
+  (:require [clojure.pprint :refer [pprint]]
+            [clojure.tools.logging :as log]
+            ))
 
 (defn- service-metric-builder []
   {
@@ -38,5 +40,5 @@
          (swap! metrics assoc-in k 1)
          ))
      (catch Throwable e
-       (println "error in bump. no such metric: " metric metrics)))))
+       (log/error e "error in bump. no such metric: " metric metrics)))))
 
