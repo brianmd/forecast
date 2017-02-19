@@ -14,10 +14,6 @@ There are two ways to run this:
 - [memory version](doc/memory.md), uses a memory repository for holding the ip and location information,
 - [aerospike version](doc/aero.md), uses, well, an aerospike repository.
 
-### Important Note
-
-If you used a previous version of this, you'll need to run _./build.sh_, or even better, _docker rmi forecast__.
-
 ## Logfiles
 
 Three example logfiles are provided in the data directory:
