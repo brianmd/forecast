@@ -13,15 +13,51 @@
            (clojure.lang IPersistentMap)
            ))
 
+(def nspace "test")
+
+(defn ->key
+  [keyname]
+  (h/encode-as-str keyname))
+
+(defn <-key
+  [o]
+  (h/decode-str o))
+
+(defn ->bin-key
+  [keyname]
+  (h/encode-as-str keyname))
+
+(defn <-bin-key
+  [o]
+  (h/decode-str o))
+
+(defn ->bin-value
+  [o]
+  (cond
+    (number? o) o
+    :else (h/encode-as-str o)))
+
+(defn <-bin-value
+  [o]
+  (h/decode-str o))
+
+(defn encode-bin-map
+  [m]
+  (h/mapm (fn [[k v]] [(->bin-key k) (->bin-value v)]) m))
+
+(defn decode-bin-map
+  [m]
+  (h/mapm (fn [[k v]] [(<-bin-key k) (<-bin-value v)]) m))
+
 (defn setup!
   [init-commands-fn]
   (when-not @aero/conn-atom
-    (let [_ (log/info "connecting ...")
-          host (or (System/getenv "AEROSPIKE_HOST") "127.0.0.1")
+    (let [host (or (System/getenv "AEROSPIKE_HOST") "127.0.0.1")
           port (or (System/getenv "AEROSPIKE_PORT") 3000)
+          _ (log/info (str "connecting to " host ":" port " ..."))
           repo (aero/connect! host port)]
       (reset! aero/conn-atom repo)))
-  (aero/init-once! @aero/conn-atom "test" "test-set")
+  (aero/init-once! @aero/conn-atom nspace "test-set")
   (when init-commands-fn (init-commands-fn @aero/conn-atom))
   @aero/conn-atom)
 ;; (close! nil)
@@ -37,46 +73,45 @@
 (defn upsert-cols!
   "set key's value to map 'm'. retains keys not provided in m"
   [repo set key m]
-  (let [id (h/->keyname key)
-        m (stringify-keys m)]
-    (aero/put! repo "test" set id
-               (assoc m "_id" id))
+  (let [id (->key key)]
+    (aero/put! repo nspace set id
+               (encode-bin-map (assoc m :_id id)))
     ))
 
 (defn find
   "finds record with id 'key'"
   [repo set key]
-  (let [k (h/->keyname key)]
-    (let [m (aero/get repo "test" set k)]
-      ;; convert back to clojure-type keys
-      (if m (-> (into {} m) keywordize-keys (dissoc :_id)))
+  (let [k (->key key)]
+    (let [m (aero/get repo nspace set k)]
+      (dissoc (decode-bin-map m) :_id)
       )))
 
 (defn query
-  [repo set key]
-  (let [key-value (first key)
-        keyname (name (first key-value))
-        value (second key-value)
+  [repo set query-map]
+  (let [key-value (first query-map)
+        keyname (->bin-key (first key-value))
+        value (->bin-value (second key-value))
         recs  (q/query repo
                        (q/mk-statement
-                        {:ns "test" :set set}
+                        {:ns nspace :set set}
                         (q/f-equal keyname value)))
         ]
-    (let [recs (map h/->map recs)]
-      (into {} (map #(vector (read-string (:_id %)) (dissoc % :_id))) recs))
+    (let [recs (map #(.bins (.record %)) recs)
+          recs (map decode-bin-map recs)
+          recs (h/mapm (fn [m] [(:_id m) (dissoc m :_id)]) recs)
+          ]
+      recs)
     ))
-;; (query @aero/conn-atom "ip" {"state" "new"})
-;; (-> (query @aero/conn-atom "ip" {"state" "new"}) first second :id)
 
 (defn forecast-initial-commands
   [repo]
-  (q/create-index! repo "test" "ip"       "ipstate"       "state" :string)
-  (q/create-index! repo "test" "location" "locationstate" "state" :string)
+  (q/create-index! repo nspace "ip"       "ipstate"       (->bin-key :state) :string)
+  (q/create-index! repo nspace "location" "locationstate" (->bin-key :state) :string)
   )
 
 (defn build-repository
   [set-name]
-  (let [repo (setup! forecast-initial-commands)
+  (let [repo (setup! #'forecast-initial-commands)
         metrics (atom {})]
     {:type            :aerospike
      :repo            repo

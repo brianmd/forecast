@@ -81,13 +81,34 @@
   (if rec (hash->map (.bins (.record rec)))))
 
 (defn add-state
-  [key m]
+  [_ m]
   (let [; s (->keyname key)
         date (now)
-        m (cond-> (assoc m :id key)
+        m (cond-> m ;; (assoc m :id key)
             (not (contains? m :state)) (assoc :state "new"
                                               :stated-on date
                                               :created-on date)
             )
         ]
     m))
+
+(defn encode-as-str
+  [o]
+  (if (string? o)
+    o
+    (str "~e" (pr-str o))))
+
+(defn decode-str
+  [o]
+  (if (and (string? o) (= \~ (first o)) (<= 4 (count o)) (= "~e" (subs o 0 2)))
+    (read-string (subs o 2))
+    o))
+
+(defn mapm
+  "returns PersistentArrayMap with maps applied to f.
+  f should return seq of 2 element seqs."
+  ([f] (partial mapm f))
+  ([f & maps]
+   (into {}
+         (apply map f maps))))
+;; (mapm (fn [[k v]] (vector k(inc v))) {:a 1 :b 5 :c 9})

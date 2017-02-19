@@ -29,14 +29,13 @@
 
 (defn store-location
   [lat-long]
-  (let [key (h/->keyname lat-long)]
-    (r/upsert-cols! @location-repo key (h/add-state key lat-long))))
+  (r/upsert-cols! @location-repo lat-long (h/add-state lat-long {})))
 
 (defn find-forecast
   [location]
   ;; TODO: could validate location before making this call
   (let [lat-long (select-keys location [:latitude :longitude])
-        key (h/->keyname lat-long)]
+        key lat-long]
     (try
       (do
         (r/upsert-cols! @location-repo key {:state "processing"})
@@ -49,12 +48,9 @@
               (r/upsert-cols! @location-repo key {:temp forecast :state "done"})
               forecast))))
       (catch Throwable e
-        (r/upsert-cols! @location-repo key {:state "error"})
         (log/errorf e "ill-formed location:  %s" location)
+        (r/upsert-cols! @location-repo key {:state "error"})
         ))))
-;; (find-forecast 3)
-;; (@forecast-service 3)
-;; (h/add-state "xx" {:temp 3})
 
 (defn new-maps []
   (r/query @location-repo {:state "new"}))
@@ -62,7 +58,7 @@
   (r/query @location-repo {:state "done"}))
 
 (defn new-locations []
-  (map #(select-keys % [:latitude :longitude]) (vals (r/query @location-repo {:state "new"}))))
+  (keys (r/query @location-repo {:state "new"})))
 
 (defn done-temperatures []
   (map :temp (vals (r/query @location-repo {:state "done"}))))
@@ -70,4 +66,3 @@
 ;; set defaults
 (use-memory-storage)
 (use-random-service)
-

@@ -44,9 +44,9 @@
           (let [_ (r/upsert-cols! @ip-repo ip {:state "processing"})
                 lat-long (@locate-service ip)]
             (if (and (map? lat-long) (contains? lat-long :error))
-              (r/upsert-cols! @ip-repo ip (merge {:state "error" :retrieved-on (now)} lat-long))
+              (r/upsert-cols! @ip-repo ip (merge {:state "error" :retrieved (now)} lat-long))
               (do
-                (r/upsert-cols! @ip-repo ip (merge {:state "done" :retrieved-on (now)} lat-long))
+                (r/upsert-cols! @ip-repo ip (merge {:state "done" :retrieved (now)} lat-long))
                 (forecast/store-location lat-long)
                 ))
             lat-long)))
@@ -61,8 +61,23 @@
       )))
 
 (defn new-ips []
-  (map (comp :id second) (r/query @ip-repo {:state "new"})))
+  ;; (map (comp :id second) (r/query @ip-repo {:state "new"})))
+  ;; (map first (r/query @ip-repo {:state "new"})))
+  (keys (r/query @ip-repo {:state "new"})))
 
 ;; set defaults
 (use-memory-storage)
 (use-random-service)
+
+;; (use-aerospike-storage)
+;; (new-ips)
+;; (r/query @ip-repo {:state "new"})
+;; (r/find @ip-repo "10.8.0.1")
+;; (forecast.repository.storage.aerospike/query (:repo @ip-repo) "ip" {:state "new"})
+
+;; (forecast.repository.storage.aerospike/query (:repo @forecast.repository.ip-locator/ip-repo) "ip" {:state "new"})
+;; (def x (forecast.repository.storage.aerospike/query (:repo @forecast.repository.ip-locator/ip-repo) "ip" {:state "new"}))
+;; (-> (first x) decode-bin-map)
+
+;; (forecast.repository.storage.aerospike/query (:repo @forecast.repository.location-forecast/location-repo) "location" {:state "new"})
+;; (forecast.repository.storage.aerospike/upsert-cols! (:repo @forecast.repository.location-forecast/location-repo) "location" {:lat-lon 4} {:state "hmm"})
