@@ -1,13 +1,13 @@
 #!/bin/bash
-if ! ( docker images | grep forecast >/dev/null ); then
-  echo "build forecast docker image"
-  ./build.sh
-fi
+. ./setup.sh
 
 if [[ ! -z "$1" ]]; then
     cp "$1" data/dockerlog || exit 1
     dockerlogfile=dockerlog
+else
+    echo "please specify the filename to load"
+    exit 1
 fi
 
-docker run -it --rm -v $PWD/data:/usr/src/app/data --link forecast-aero:aero -e WEATHER_API=$WEATHER_API -e AEROSPIKE_HOST=aero --name load-log forecast java -jar app-standalone.jar $dockerlogfile --aero --load $@
+docker run -it --rm -v $PWD/data:/usr/src/app/data --link forecast-aero:aero -e WEATHER_API=$WEATHER_API -e AEROSPIKE_HOST=aero --name load-log forecast:$FORECAST_VERSION java -jar app-standalone.jar $dockerlogfile --aero --load $@
 
