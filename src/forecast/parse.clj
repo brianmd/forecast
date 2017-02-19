@@ -51,14 +51,16 @@
 
 (defn infinite-loop
   ([f] (infinite-loop f nil))
-  ([f delay] (infinite-loop f delay nil)
+  ([f delay] (infinite-loop f delay nil))
   ([f delay name]
    (go
      (loop []
        (try
          (f)
          (catch Throwable e
-           (log/errorf e (str "error in infinite-loop " name))))
+           (if (re-find #"(?m)^.*Index not found.*$" (str e))
+             (use-aerospike-storage)
+             (log/errorf e (str "error in infinite-loop " name)))))
        (if delay (Thread/sleep delay))
        (when-not @stop-threads? (recur))
        ))))

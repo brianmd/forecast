@@ -29,8 +29,4 @@
         (log/errorf e "error in ipinfo-io/find-location eee: %s" ip))
       {:error (str e)})))
 
-;; (try (/ 1 0) (catch Throwable e
-;;                (str e)
-;;                (throw e)
-;;                ))
 
