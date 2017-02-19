@@ -1,2 +1,3 @@
 #!/bin/sh
-docker build -t forecast .
+. ./version.sh
+docker build -t forecast:$FORECAST_VERSION .
