@@ -51,10 +51,14 @@
 
 (defn infinite-loop
   ([f] (infinite-loop f nil))
-  ([f delay]
+  ([f delay] (infinite-loop f delay nil)
+  ([f delay name]
    (go
      (loop []
-       (f)
+       (try
+         (f)
+         (catch Throwable e
+           (log/errorf e (str "error in infinite-loop " name))))
        (if delay (Thread/sleep delay))
        (when-not @stop-threads? (recur))
        ))))
@@ -71,9 +75,9 @@
 
 (defn daemon
   []
-  (infinite-loop process-new-ips 1000)
-  (infinite-loop process-new-locations 1000)
-  (infinite-loop print-metrics 15000)
+  (infinite-loop #'process-new-ips 1000 "process-new-ips")
+  (infinite-loop #'process-new-locations 1000 "process-new-location")
+  (infinite-loop #'print-metrics 15000 "print-metrics")
   (sleep-forever))
 
 (defn get-histogram
