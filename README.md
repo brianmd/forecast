@@ -28,7 +28,7 @@ The logfile for this program (how meta) is data/log.log.
 
 # How It Works
 
-![how it works](how-it-works.jpg)
+![how it works](doc/how-it-works.jpg)
 
 _Note: the following description explains the aerospike storage version,
 but the memory and datascript repositories operate similarly._
