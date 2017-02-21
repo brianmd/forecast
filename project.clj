@@ -15,7 +15,7 @@
                  [incanter "1.5.7"]   ;; R-like library
                  [cheshire "5.7.0"]   ;; json
                  [aeroclj "0.1.1"]
-                 ;; [com.aerospike/aerospike-client "3.0.9"]
+                 [datascript "0.15.5"]
                  ]
   :main ^:skip-aot forecast.core
   :target-path "target/%s"
