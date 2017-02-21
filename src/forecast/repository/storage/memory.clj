@@ -56,3 +56,10 @@
      :delete-all!     identity
      }))
 
+;; (def r (build-repository "ip"))
+;; (forecast.repository.repository/upsert-cols! r "8.8.8.8" {:a 6 :g 6})
+;; (forecast.repository.repository/upsert-cols! r "8.8.8.9" {:a 99 :g 6})
+;; (forecast.repository.repository/find r "8.8.8.8")
+;; (forecast.repository.repository/find r "8.8.8.9")
+;; (forecast.repository.repository/query r {:g 6})
+;; (upsert-cols! (:repo r) "8.8.8.9" {:a 99 :g 6})

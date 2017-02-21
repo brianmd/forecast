@@ -6,6 +6,7 @@
 
             [forecast.repository.storage.memory :as memory]
             [forecast.repository.storage.aerospike :as aero]
+            [forecast.repository.storage.datascript :as datascript]
 
             [forecast.repository.forecast-service.openweathermap-org :as openweather]
             [forecast.repository.forecast-service.random :as random]
@@ -20,6 +21,9 @@
 
 (defn use-aerospike-storage []
   (reset! location-repo (aero/build-repository "location")))
+
+(defn use-datascript-storage []
+  (reset! location-repo (datascript/build-repository "location")))
 
 (defn use-random-service []
   (reset! forecast-service #'random/find-forecast))

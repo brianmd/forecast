@@ -6,7 +6,7 @@
 
             [forecast.repository.storage.memory :as memory]
             [forecast.repository.storage.aerospike :as aero]
-
+            [forecast.repository.storage.datascript :as datascript]
 
             [forecast.repository.locate-service.ipinfo-io :as ipinfo-io]
             [forecast.repository.locate-service.random :as random]
@@ -22,6 +22,9 @@
 
 (defn use-aerospike-storage []
   (reset! ip-repo (aero/build-repository "ip")))
+
+(defn use-datascript-storage []
+  (reset! ip-repo (datascript/build-repository "ip")))
 
 (defn use-random-service []
   (reset! locate-service #'random/find-location))

@@ -2,7 +2,16 @@
   (:refer-clojure :exclude [find])
   (:require [forecast.metrics :refer [bump]]
             [datascript.core :as d]
+            [forecast.helpers :as h]
             ))
+
+(defn ->key
+  [keyname]
+  (h/encode-as-str keyname))
+
+(defn <-key
+  [o]
+  (h/decode-str o))
 
 (defn v->hash [v]
   (into {} (map (comp vec rest) v)))
@@ -32,7 +41,7 @@
 (defn find
   "finds record with id 'key'"
   [repo key]
-  (find-aux repo [:gid key]))
+  (find-aux repo [:gid (->key key)]))
 
 (defn query
   [repo key-value]
@@ -43,17 +52,18 @@
                 :where
                 [?e ?key ?value]
                 [?e ?a ?v]]
-              @(:repo r)
+              @repo
               key value)
          merge-entities
-         (map #(vector (:gid %) (dissoc % :gid)))
+         (map #(vector (<-key (:gid %)) (dissoc % :gid)))
          (into {})
          )))
 
 (defn upsert-cols!
   "set key's value to map 'm'. retains keys not provided in m"
   [repo key m]
-  (d/transact! repo [(assoc m :gid key)]))
+  (d/transact! repo [(assoc m :gid (->key key))])
+  {key m})
 
 (defn build-repository
   [table-name]
@@ -64,9 +74,9 @@
      :repo            repo
      :metrics         metrics
      :close!          (fn [& _] (reset! repo {}))
-     ;; :find            (partial #'find repo)
+     :find            (partial #'find repo)
      ;; :find-all        #(find-all repo)
-     ;; :query           (partial #'query repo)
+     :query           (partial #'query repo)
      :find-seq        identity
      :find-all-seq    identity
      :insert!         identity
@@ -80,14 +90,15 @@
 
 
 ;; (def r (build-repository "ip"))
-;; (upsert-cols! (:repo r) "8.8.8.8" {:a 5})
-;; (upsert-cols! (:repo r) "8.8.8.8" {:a 6})
-;; (upsert-cols! (:repo r) "8.8.8.8" {:g 6})
-;; (upsert-cols! (:repo r) "8.8.8.9" {:a 99 :g 6})
-;; (entity->hash (:repo r) 1)
-;; (find-aux (:repo r) [:gid "8.8.8.8"])
-;; (find (:repo r) "8.8.8.8")
-;; (d/q '[:find
-;;        :where [?e :gid ]])
-;; (query (:repo r) {:g 6})
+;; (def r2 (build-repository "location"))
+;; (forecast.repository.repository/upsert-cols! r "8.8.8.8" {:a 6 :g 6})
+;; (forecast.repository.repository/upsert-cols! r "8.8.8.9" {:a 99 :g 6})
+;; (forecast.repository.repository/find r "8.8.8.8")
+;; (forecast.repository.repository/find r "8.8.8.9")
+;; (forecast.repository.repository/query r {:g 6})
+;; (upsert-cols! (:repo r) "8.8.8.9" {:g 7})
 
+(def r (build-repository "ip"))
+(forecast.repository.repository/upsert-cols! r {:lat 2} {:a 7 :g 6})
+(forecast.repository.repository/find r {:lat 2})
+(forecast.repository.repository/query r {:g 6})

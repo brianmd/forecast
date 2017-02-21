@@ -8,7 +8,6 @@
             [forecast.metrics :as metrics]
             [forecast.repository.ip-locator :as ip]
             [forecast.repository.location-forecast :as location]
-            [forecast.repository.storage.memory :as memory]
             ))
 
 (defn use-memory-storage
@@ -20,6 +19,11 @@
   []
   (ip/use-aerospike-storage)
   (location/use-aerospike-storage))
+
+(defn use-datascript-storage
+  []
+  (ip/use-datascript-storage)
+  (location/use-datascript-storage))
 
 (defn parse-logfile
   [filename f]
@@ -112,10 +116,17 @@
         load? (contains? args "--load")
         process? (contains? args "--process")
         num-bins-location (if process? second first)]
+
     ;; setup
+    (when (contains? args "--memory")
+      (h/log-it "using memory")
+      (use-memory-storage))
     (when (contains? args "--aero")
       (h/log-it "using aerospike")
       (use-aerospike-storage))
+    (when (contains? args "--datascript")
+      (h/log-it "using datascript")
+      (use-datascript-storage))
     (when (contains? args "--live")
       (h/log-it "using live services")
       (use-live))
