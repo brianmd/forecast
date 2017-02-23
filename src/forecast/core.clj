@@ -1,7 +1,5 @@
 (ns forecast.core
   (:require [forecast.parse :as parse]
-            [forecast.repository.ip-locator :refer [use-ipinfo-service]]
-            [forecast.repository.location-forecast :refer [use-openweather-service]]
             )
   (:gen-class))
 

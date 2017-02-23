@@ -1,3 +1,3 @@
 #!/bin/sh
-export FORECAST_VERSION=1.04a
+export FORECAST_VERSION=1.06
 

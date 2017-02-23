@@ -3,34 +3,11 @@
             [clojure.string :as string]
             [forecast.helpers :as h :refer [valid-ip? bump now]]
             [forecast.repository.repository :as r]
-
-            [forecast.repository.storage.memory :as memory]
-            [forecast.repository.storage.aerospike :as aero]
-            [forecast.repository.storage.datascript :as datascript]
-
-            [forecast.repository.locate-service.ipinfo-io :as ipinfo-io]
-            [forecast.repository.locate-service.random :as random]
-
             [forecast.repository.location-forecast :as forecast]
             ))
 
 (defonce locate-service (atom nil))
 (def ip-repo (atom nil))
-
-(defn use-memory-storage []
-  (reset! ip-repo (memory/build-repository "ip")))
-
-(defn use-aerospike-storage []
-  (reset! ip-repo (aero/build-repository "ip")))
-
-(defn use-datascript-storage []
-  (reset! ip-repo (datascript/build-repository "ip")))
-
-(defn use-random-service []
-  (reset! locate-service #'random/find-location))
-
-(defn use-ipinfo-service []
-  (reset! locate-service #'ipinfo-io/find-location))
 
 (defn store-ip
   [ips]
@@ -67,10 +44,6 @@
   ;; (map (comp :id second) (r/query @ip-repo {:state "new"})))
   ;; (map first (r/query @ip-repo {:state "new"})))
   (keys (r/query @ip-repo {:state "new"})))
-
-;; set defaults
-(use-memory-storage)
-(use-random-service)
 
 ;; (use-aerospike-storage)
 ;; (new-ips)

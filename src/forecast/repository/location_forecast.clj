@@ -4,32 +4,11 @@
             [forecast.helpers :as h]
             [forecast.repository.repository :as r]
 
-            [forecast.repository.storage.memory :as memory]
-            [forecast.repository.storage.aerospike :as aero]
-            [forecast.repository.storage.datascript :as datascript]
-
-            [forecast.repository.forecast-service.openweathermap-org :as openweather]
-            [forecast.repository.forecast-service.random :as random]
 
             [clojure.set :as set]))
 
 (defonce forecast-service (atom nil))
 (def location-repo (atom nil))
-
-(defn use-memory-storage []
-  (reset! location-repo (memory/build-repository "location")))
-
-(defn use-aerospike-storage []
-  (reset! location-repo (aero/build-repository "location")))
-
-(defn use-datascript-storage []
-  (reset! location-repo (datascript/build-repository "location")))
-
-(defn use-random-service []
-  (reset! forecast-service #'random/find-forecast))
-
-(defn use-openweather-service []
-  (reset! forecast-service #'openweather/find-forecast))
 
 (defn store-location
   [lat-long]
@@ -66,7 +45,3 @@
 
 (defn done-temperatures []
   (map :temp (vals (r/query @location-repo {:state "done"}))))
-
-;; set defaults
-(use-memory-storage)
-(use-random-service)

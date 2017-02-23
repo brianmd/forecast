@@ -5,25 +5,15 @@
             [clojure.core.async :refer [go]]
 
             [forecast.helpers :as h]
+            [forecast.repository.manage-repositories :as manage]
             [forecast.metrics :as metrics]
             [forecast.repository.ip-locator :as ip]
             [forecast.repository.location-forecast :as location]
             ))
 
-(defn use-memory-storage
-  []
-  (ip/use-memory-storage)
-  (location/use-memory-storage))
-
-(defn use-aerospike-storage
-  []
-  (ip/use-aerospike-storage)
-  (location/use-aerospike-storage))
-
-(defn use-datascript-storage
-  []
-  (ip/use-datascript-storage)
-  (location/use-datascript-storage))
+;; set default repositories
+(manage/use-random-services)
+(manage/use-memory-storage)
 
 (defn parse-logfile
   [filename f]
@@ -63,7 +53,7 @@
          (f)
          (catch Throwable e
            (if (re-find #"(?m)^.*Index not found.*$" (str e))
-             (use-aerospike-storage)
+             (manage/use-aerospike-storage)
              (log/errorf e (str "error in infinite-loop " name)))))
        (if delay (Thread/sleep delay))
        (when-not @stop-threads? (recur))
@@ -105,10 +95,6 @@
     )
   )
 
-(defn use-live []
-  (ip/use-ipinfo-service)
-  (location/use-openweather-service))
-
 (defn parse-args
   [params]
   (metrics/reset-metrics)
@@ -120,16 +106,16 @@
     ;; setup
     (when (contains? args "--memory")
       (h/log-it "using memory")
-      (use-memory-storage))
+      (manage/use-memory-storage))
     (when (contains? args "--aero")
       (h/log-it "using aerospike")
-      (use-aerospike-storage))
+      (manage/use-aerospike-storage))
     (when (contains? args "--datascript")
       (h/log-it "using datascript")
-      (use-datascript-storage))
+      (manage/use-datascript-storage))
     (when (contains? args "--live")
       (h/log-it "using live services")
-      (use-live))
+      (manage/use-live-services))
 
     ;; load logfile
     (when (and (or load? process?)
@@ -169,8 +155,8 @@
 ;; (get-histogram 5)
 
 
-;; (use-memory-storage)
-;; (use-aerospike-storage)
+;; (manage/use-memory-storage)
+;; (manage/use-aerospike-storage)
 ;; (run "logfile" 5)
 
 
