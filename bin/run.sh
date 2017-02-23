@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./version.sh
+. ./ensure-version.sh
 
 if [[ -z "$WEATHER_API" ]]; then
   echo "Must set WEATHER_API environment variable."
