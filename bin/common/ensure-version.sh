@@ -3,5 +3,5 @@
 
 if ! ( docker images | grep "forecast\\s*${FORECAST_VERSION}\\s" >/dev/null ); then
     echo "build forecast docker image $FORECAST_VERSION"
-    ./build.sh
+    bin/common/build.sh
 fi

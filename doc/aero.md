@@ -2,32 +2,32 @@
 
 Four terminals are needed. Start aerospike in the first terminal:
 ```sh
-$ bin/aero.sh
+$ bin/aero/run-storage.sh
 ```
 _Note: you may stop and re-start aero.sh to clear existing data._
 
 You'll need an api key, which may be obtained by signing up on https://openweathermap.com/.
 Start the ip and location processing daemon in the second terminal:
 ```sh
-$ WEATHER_API=apikey bin/daemon.sh [--live]
+$ WEATHER_API=apikey bin/aero/daemon.sh [--live]
 ```
 _Note: by default random data is used for the locations and forecasts. Add the __--live__ flag to use ipinfo.io and openweathermap.com for data._
 
 Push a logfile into aerospike in the third terminal:
 ```sh
-$ bin/load-logfile.sh data/logfile
+$ bin/aero/load-logfile.sh data/logfile
 ```
 _Note: the parameter is the path to the logfile._
 
 And finally request the histogram in the fourth terminal:
 ```sh
-$ bin/histogram.sh 10
+$ bin/aero/histogram.sh 10
 ```
 _Note: the parameter is the number of bins for the histogram._
 
 Aerospike's aql program may be run to view the data:
 ```sh
-$ bin/aql.sh
+$ bin/aero/cli.sh
 ```
 Two sets are used, ip and location. Here are three interesting aql commands:
 ```sh

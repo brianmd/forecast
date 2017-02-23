@@ -14,7 +14,7 @@ There are two ways to run this:
 - [memory version](doc/memory.md), uses a memory repository for holding the ip and location information,
 - [aerospike version](doc/aero.md), uses an aerospike repository.
 - `datascript version`, uses, well, a datascript repository.
-Usage is identical to the memory version, except use `run-datascript.sh` in place of `run`.
+Usage is identical to the memory version, except use `bin/datascript/run.sh` in place of `bin/memory/run.sh`.
 
 ## Logfiles
 

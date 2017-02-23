@@ -4,6 +4,6 @@ if [[ -z "$WEATHER_API" ]]; then
     exit 1
 fi
 
-. ./setup.sh
+. bin/aero/setup.sh
 
 docker run -it --rm -v $PWD/data:/usr/src/app/data -e "WEATHER_API=$WEATHER_API" -e AEROSPIKE_HOST=aero --link forecast-aero:aero --name fore-daemon forecast:$FORECAST_VERSION java -jar app-standalone.jar --daemon --aero $@

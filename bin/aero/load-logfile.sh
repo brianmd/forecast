@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./setup.sh
+. bin/aero/setup.sh
 
 if [[ ! -z "$1" ]]; then
     cp "$1" data/dockerlog || exit 1
