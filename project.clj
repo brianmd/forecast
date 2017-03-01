@@ -11,11 +11,16 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [ch.qos.logback/logback-classic "1.2.1"]
 
+                 [org.clojure/core.async "0.3.441"]
+
                  [clj-http "2.3.0"]
                  [incanter "1.5.7"]   ;; R-like library
                  [cheshire "5.7.0"]   ;; json
                  [aeroclj "0.1.1"]
                  [datascript "0.15.5"]
+                 [io.reactivex/rxclojure "1.0.0"]
+                 [funcool/beicon "3.1.1"]
+                 ;; [org.clojars.jconti/rxclojure "1.2.2"]
                  ]
   :main ^:skip-aot forecast.core
   :target-path "target/%s"
